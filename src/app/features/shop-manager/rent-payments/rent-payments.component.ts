@@ -1,0 +1,578 @@
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RentPaymentService } from '@shared/services/rent-payment.service';
+import { LoadingComponent } from '@shared/components/loading/loading.component';
+
+@Component({
+  selector: 'app-shop-rent-payments',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSnackBarModule,
+    LoadingComponent
+  ],
+  template: `
+    <div class="rent-payments-container">
+      <div class="page-header">
+        <div>
+          <h1>Paiements de loyer</h1>
+          <p class="subtitle">Soumettez et suivez vos paiements de loyer</p>
+        </div>
+        <button mat-raised-button color="primary" (click)="showPaymentForm = !showPaymentForm">
+          <mat-icon>{{ showPaymentForm ? 'close' : 'add' }}</mat-icon>
+          {{ showPaymentForm ? 'Annuler' : 'Nouveau paiement' }}
+        </button>
+      </div>
+
+      <!-- Payment Form -->
+      @if (showPaymentForm) {
+        <mat-card class="payment-form-card">
+          <mat-card-header>
+            <mat-card-title>Soumettre un paiement</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form class="payment-form" (ngSubmit)="submitPayment()">
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Mois</mat-label>
+                  <mat-select [(ngModel)]="newPayment.month" name="month" required>
+                    @for (month of months; track month.value) {
+                      <mat-option [value]="month.value">{{ month.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Année</mat-label>
+                  <mat-select [(ngModel)]="newPayment.year" name="year" required>
+                    @for (year of years; track year) {
+                      <mat-option [value]="year">{{ year }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Montant (Ar)</mat-label>
+                  <input matInput type="number" [(ngModel)]="newPayment.amount" name="amount" required min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Mode de paiement</mat-label>
+                  <mat-select [(ngModel)]="newPayment.paymentMethod" name="method" required>
+                    <mat-option value="cash">Espèces</mat-option>
+                    <mat-option value="check">Chèque</mat-option>
+                    <mat-option value="bank_transfer">Virement bancaire</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Date de paiement</mat-label>
+                <input matInput [matDatepicker]="picker" [(ngModel)]="newPayment.paymentDate" name="paymentDate" required>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+
+              <div class="file-upload">
+                <label>Justificatif de paiement (optionnel)</label>
+                <input type="file" (change)="onFileSelect($event)" accept="image/*,.pdf">
+                @if (selectedFile) {
+                  <span class="file-name">{{ selectedFile.name }}</span>
+                }
+              </div>
+
+              <div class="form-actions">
+                <button mat-button type="button" (click)="showPaymentForm = false">Annuler</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="isSubmitting()">
+                  @if (isSubmitting()) {
+                    Envoi en cours...
+                  } @else {
+                    Soumettre
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <!-- Stats Cards -->
+      <div class="stats-row">
+        <mat-card class="stat-card">
+          <mat-icon>pending</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.pendingPayments || 0 }}</span>
+            <span class="stat-label">En attente</span>
+          </div>
+        </mat-card>
+        <mat-card class="stat-card validated">
+          <mat-icon>check_circle</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.validatedPayments || 0 }}</span>
+            <span class="stat-label">Validés</span>
+          </div>
+        </mat-card>
+        <mat-card class="stat-card total">
+          <mat-icon>payments</mat-icon>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.totalPaid | number:'1.0-0' }} Ar</span>
+            <span class="stat-label">Total payé</span>
+          </div>
+        </mat-card>
+      </div>
+
+      <!-- Payments Table -->
+      @if (isLoading()) {
+        <app-loading message="Chargement des paiements..."></app-loading>
+      } @else {
+        <mat-card class="table-card">
+          <mat-card-header>
+            <mat-card-title>Historique des paiements</mat-card-title>
+          </mat-card-header>
+          <table mat-table [dataSource]="payments()">
+            <!-- Payment Number -->
+            <ng-container matColumnDef="paymentNumber">
+              <th mat-header-cell *matHeaderCellDef>N° Paiement</th>
+              <td mat-cell *matCellDef="let payment">
+                <span class="payment-number">{{ payment.paymentNumber }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Period -->
+            <ng-container matColumnDef="period">
+              <th mat-header-cell *matHeaderCellDef>Période</th>
+              <td mat-cell *matCellDef="let payment">
+                {{ getMonthLabel(payment.period?.month) }} {{ payment.period?.year }}
+              </td>
+            </ng-container>
+
+            <!-- Amount -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Montant</th>
+              <td mat-cell *matCellDef="let payment">
+                <span class="amount">{{ payment.amount | number:'1.2-2' }} Ar</span>
+              </td>
+            </ng-container>
+
+            <!-- Method -->
+            <ng-container matColumnDef="method">
+              <th mat-header-cell *matHeaderCellDef>Mode</th>
+              <td mat-cell *matCellDef="let payment">
+                {{ getMethodLabel(payment.paymentMethod) }}
+              </td>
+            </ng-container>
+
+            <!-- Status -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Statut</th>
+              <td mat-cell *matCellDef="let payment">
+                <mat-chip [class]="'status-' + payment.status">
+                  {{ getStatusLabel(payment.status) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Date -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let payment">
+                {{ payment.paymentDate | date:'dd/MM/yyyy' }}
+              </td>
+            </ng-container>
+
+            <!-- Invoice -->
+            <ng-container matColumnDef="invoice">
+              <th mat-header-cell *matHeaderCellDef>Facture</th>
+              <td mat-cell *matCellDef="let payment">
+                @if (payment.invoice?.path) {
+                  <button mat-icon-button color="primary" (click)="downloadInvoice(payment)">
+                    <mat-icon>download</mat-icon>
+                  </button>
+                } @else {
+                  -
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          @if (payments().length === 0) {
+            <div class="empty-state">
+              <mat-icon>receipt_long</mat-icon>
+              <h3>Aucun paiement</h3>
+              <p>Vous n'avez pas encore soumis de paiement.</p>
+              <button mat-raised-button color="primary" (click)="showPaymentForm = true">
+                <mat-icon>add</mat-icon>
+                Soumettre un paiement
+              </button>
+            </div>
+          }
+
+          <mat-paginator
+            [length]="pagination()?.total || 0"
+            [pageSize]="pagination()?.limit || 10"
+            [pageIndex]="(pagination()?.page || 1) - 1"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons>
+          </mat-paginator>
+        </mat-card>
+      }
+    </div>
+  `,
+  styles: [`
+    .rent-payments-container {
+      padding: 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        margin: 4px 0 0 0;
+      }
+    }
+
+    .payment-form-card {
+      margin-bottom: 24px;
+
+      .payment-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px 0;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 16px;
+
+        mat-form-field {
+          flex: 1;
+        }
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .file-upload {
+        label {
+          display: block;
+          margin-bottom: 8px;
+          color: var(--text-secondary);
+        }
+
+        .file-name {
+          margin-left: 8px;
+          color: var(--primary);
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+
+      mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        color: var(--warning);
+      }
+
+      &.validated mat-icon {
+        color: var(--success);
+      }
+
+      &.total mat-icon {
+        color: var(--primary);
+      }
+
+      .stat-info {
+        display: flex;
+        flex-direction: column;
+
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+        }
+
+        .stat-label {
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .table-card {
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    .payment-number {
+      font-family: monospace;
+      font-weight: 500;
+    }
+
+    .amount {
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    mat-chip {
+      &.status-pending {
+        background: var(--warning-light) !important;
+        color: var(--warning) !important;
+      }
+      &.status-validated {
+        background: var(--success-light) !important;
+        color: var(--success) !important;
+      }
+      &.status-rejected {
+        background: var(--error-light) !important;
+        color: var(--error) !important;
+      }
+      &.status-late {
+        background: var(--error-light) !important;
+        color: var(--error) !important;
+      }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: var(--gray-300);
+      }
+
+      h3 {
+        margin: 16px 0 8px;
+      }
+
+      p {
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+    }
+
+    mat-paginator {
+      border-top: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+    }
+  `]
+})
+export class ShopRentPaymentsComponent implements OnInit {
+  payments = signal([]);
+  stats = signal(null);
+  pagination = signal(null);
+  isLoading = signal(true);
+  isSubmitting = signal(false);
+
+  showPaymentForm = false;
+  selectedFile = null;
+
+  displayedColumns = ['paymentNumber', 'period', 'amount', 'method', 'status', 'date', 'invoice'];
+
+  months = [
+    { value: 1, label: 'Janvier' },
+    { value: 2, label: 'Février' },
+    { value: 3, label: 'Mars' },
+    { value: 4, label: 'Avril' },
+    { value: 5, label: 'Mai' },
+    { value: 6, label: 'Juin' },
+    { value: 7, label: 'Juillet' },
+    { value: 8, label: 'Août' },
+    { value: 9, label: 'Septembre' },
+    { value: 10, label: 'Octobre' },
+    { value: 11, label: 'Novembre' },
+    { value: 12, label: 'Décembre' }
+  ];
+
+  years = [];
+
+  newPayment = {
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    amount: 0,
+    paymentMethod: 'bank_transfer',
+    paymentDate: new Date()
+  };
+
+  constructor(
+    private rentPaymentService: RentPaymentService,
+    private snackBar: MatSnackBar
+  ) {
+    const currentYear = new Date().getFullYear();
+    this.years = [currentYear - 1, currentYear, currentYear + 1];
+  }
+
+  ngOnInit() {
+    this.loadPayments();
+    this.loadStats();
+  }
+
+  loadStats() {
+    this.rentPaymentService.getShopStats().subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.stats.set(response.data);
+        }
+      }
+    });
+  }
+
+  loadPayments(page = 1) {
+    this.isLoading.set(true);
+
+    this.rentPaymentService.getShopPayments({ page, limit: 10 }).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.payments.set(response.data.payments);
+          this.pagination.set(response.data.pagination);
+        }
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onPageChange(event) {
+    this.loadPayments(event.pageIndex + 1);
+  }
+
+  onFileSelect(event) {
+    this.selectedFile = event.target.files?.[0] || null;
+  }
+
+  submitPayment() {
+    this.isSubmitting.set(true);
+
+    const files = this.selectedFile ? [this.selectedFile] : undefined;
+
+    this.rentPaymentService.submitPayment({
+      month: this.newPayment.month,
+      year: this.newPayment.year,
+      amount: this.newPayment.amount,
+      paymentMethod: this.newPayment.paymentMethod,
+      paymentDate: this.newPayment.paymentDate.toISOString()
+    }, files).subscribe({
+      next: () => {
+        this.snackBar.open('Paiement soumis avec succès', 'OK', { duration: 3000 });
+        this.showPaymentForm = false;
+        this.selectedFile = null;
+        this.loadPayments();
+        this.loadStats();
+        this.isSubmitting.set(false);
+      },
+      error: () => {
+        this.snackBar.open('Erreur lors de la soumission', 'OK', { duration: 3000 });
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
+  getMonthLabel(month) {
+    return this.months.find(m => m.value === month)?.label || '';
+  }
+
+  getMethodLabel(method) {
+    const labels = {
+      cash: 'Espèces',
+      check: 'Chèque',
+      bank_transfer: 'Virement'
+    };
+    return labels[method] || method;
+  }
+
+  getStatusLabel(status) {
+    const labels = {
+      pending: 'En attente',
+      validated: 'Validé',
+      rejected: 'Rejeté',
+      late: 'En retard'
+    };
+    return labels[status] || status;
+  }
+
+  downloadInvoice(payment) {
+    if (payment.invoice?.path) {
+      window.open(payment.invoice.path, '_blank');
+    }
+  }
+}

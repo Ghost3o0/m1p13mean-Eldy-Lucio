@@ -1,0 +1,665 @@
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ReservationService } from '@shared/services/reservation.service';
+import { LoadingComponent } from '@shared/components/loading/loading.component';
+
+@Component({
+  selector: 'app-client-reservations',
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterLink,
+    FormsModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatPaginatorModule,
+    MatChipsModule,
+    MatTabsModule,
+    MatDividerModule,
+    MatDialogModule,
+    MatSnackBarModule,
+    LoadingComponent
+  ],
+  template: `
+    <div class="reservations-container">
+      <div class="page-header">
+        <div>
+          <h1>Mes Réservations</h1>
+          <p class="subtitle">Suivez vos réservations de produits</p>
+        </div>
+      </div>
+
+      <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
+        <mat-tab label="Toutes"></mat-tab>
+        <mat-tab label="En attente"></mat-tab>
+        <mat-tab label="Confirmées"></mat-tab>
+        <mat-tab label="Prêtes"></mat-tab>
+        <mat-tab label="Historique"></mat-tab>
+      </mat-tab-group>
+
+      @if (isLoading()) {
+        <app-loading message="Chargement des réservations..."></app-loading>
+      } @else {
+        <div class="reservations-list">
+          @for (reservation of reservations(); track reservation._id) {
+            <mat-card class="reservation-card">
+              <div class="reservation-header">
+                <div class="header-left">
+                  <span class="reservation-number">{{ reservation.reservationNumber }}</span>
+                  <mat-chip [class]="'status-' + reservation.status">
+                    {{ getStatusLabel(reservation.status) }}
+                  </mat-chip>
+                </div>
+                <div class="header-right">
+                  <span class="type-badge" [class]="reservation.type">
+                    {{ reservation.type === 'pay_at_pickup' ? 'Payer au retrait' : 'Payé d\'avance' }}
+                  </span>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="reservation-content">
+                <!-- Shop Info -->
+                <div class="shop-info">
+                  <mat-icon>store</mat-icon>
+                  <span>{{ getShopName(reservation.shopId) }}</span>
+                </div>
+
+                <!-- Items -->
+                <div class="items-list">
+                  @for (item of reservation.items; track item.productId) {
+                    <div class="item">
+                      @if (item.image) {
+                        <img [src]="item.image" [alt]="item.name" class="item-image">
+                      } @else {
+                        <div class="item-placeholder">
+                          <mat-icon>inventory_2</mat-icon>
+                        </div>
+                      }
+                      <div class="item-details">
+                        <span class="item-name">{{ item.name }}</span>
+                        <span class="item-quantity">x{{ item.quantity }}</span>
+                      </div>
+                      <span class="item-price">{{ item.unitPrice * item.quantity | number:'1.2-2' }} Ar</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Pickup Info -->
+                <div class="pickup-info">
+                  <mat-icon>event</mat-icon>
+                  <div class="pickup-details">
+                    <span class="pickup-label">Retrait prévu</span>
+                    <span class="pickup-date">
+                      {{ reservation.pickupDetails?.scheduledDate | date:'EEEE d MMMM yyyy' }}
+                      @if (reservation.pickupDetails?.scheduledTimeSlot) {
+                        de {{ reservation.pickupDetails?.scheduledTimeSlot?.start }}
+                        à {{ reservation.pickupDetails?.scheduledTimeSlot?.end }}
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                @if (reservation.status === 'ready' && reservation.pickupDetails?.pickupCode) {
+                  <div class="pickup-code">
+                    <mat-icon>qr_code</mat-icon>
+                    <div>
+                      <span class="code-label">Code de retrait</span>
+                      <span class="code-value">{{ reservation.pickupDetails.pickupCode }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="reservation-footer">
+                <div class="total">
+                  <span class="total-label">Total</span>
+                  <span class="total-value">{{ reservation.total | number:'1.2-2' }} Ar</span>
+                </div>
+                <div class="actions">
+                  @if (reservation.canBeCancelled) {
+                    <button mat-stroked-button color="warn" (click)="cancelReservation(reservation)">
+                      <mat-icon>cancel</mat-icon>
+                      Annuler
+                    </button>
+                  }
+                  @if (reservation.status === 'ready') {
+                    <button mat-raised-button color="primary">
+                      <mat-icon>directions</mat-icon>
+                      Itinéraire
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-card>
+          }
+
+          @if (reservations().length === 0) {
+            <mat-card class="empty-card">
+              <div class="empty-state">
+                <mat-icon>event_busy</mat-icon>
+                <h3>Aucune réservation</h3>
+                <p>Vous n'avez pas encore de réservation.</p>
+                <a mat-raised-button color="primary" routerLink="/shops">
+                  <mat-icon>store</mat-icon>
+                  Parcourir les boutiques
+                </a>
+              </div>
+            </mat-card>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="pagination()?.total || 0"
+          [pageSize]="pagination()?.limit || 10"
+          [pageIndex]="(pagination()?.page || 1) - 1"
+          [pageSizeOptions]="[10, 20]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      }
+    </div>
+  `,
+  styles: [`
+    .reservations-container {
+      padding: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+      }
+
+      .subtitle {
+        color: #666;
+        margin: 4px 0 0 0;
+      }
+    }
+
+    mat-tab-group {
+      margin-bottom: 24px;
+    }
+
+    .reservations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .reservation-card {
+      overflow: hidden;
+    }
+
+    .reservation-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .reservation-number {
+          font-family: monospace;
+          font-weight: 600;
+          font-size: 1.1rem;
+        }
+      }
+
+      .type-badge {
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.85rem;
+
+        &.pay_at_pickup {
+          background: #fff3e0;
+          color: #e65100;
+        }
+
+        &.paid_in_advance {
+          background: #e8f5e9;
+          color: #1b5e20;
+        }
+      }
+    }
+
+    mat-chip {
+      &.status-pending {
+        background: #fff3e0 !important;
+        color: #e65100 !important;
+      }
+      &.status-confirmed {
+        background: #e3f2fd !important;
+        color: #1565c0 !important;
+      }
+      &.status-ready {
+        background: #e8f5e9 !important;
+        color: #1b5e20 !important;
+      }
+      &.status-collected {
+        background: #f5f5f5 !important;
+        color: #666 !important;
+      }
+      &.status-cancelled, &.status-expired {
+        background: #ffebee !important;
+        color: #c62828 !important;
+      }
+    }
+
+    .reservation-content {
+      padding: 16px;
+    }
+
+    .shop-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      mat-icon {
+        color: #3f51b5;
+      }
+    }
+
+    .items-list {
+      margin-bottom: 16px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+
+      .item-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .item-placeholder {
+        width: 50px;
+        height: 50px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          color: #ccc;
+        }
+      }
+
+      .item-details {
+        flex: 1;
+
+        .item-name {
+          display: block;
+          font-weight: 500;
+        }
+
+        .item-quantity {
+          font-size: 0.85rem;
+          color: #666;
+        }
+      }
+
+      .item-price {
+        font-weight: 500;
+      }
+    }
+
+    .pickup-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin-bottom: 16px;
+
+      mat-icon {
+        color: #3f51b5;
+      }
+
+      .pickup-details {
+        display: flex;
+        flex-direction: column;
+
+        .pickup-label {
+          font-size: 0.85rem;
+          color: #666;
+        }
+
+        .pickup-date {
+          font-weight: 500;
+        }
+      }
+    }
+
+    .pickup-code {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #e8f5e9;
+      border-radius: 8px;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #4caf50;
+      }
+
+      .code-label {
+        display: block;
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .code-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-family: monospace;
+        color: #1b5e20;
+      }
+    }
+
+    .reservation-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #fafafa;
+
+      .total {
+        .total-label {
+          font-size: 0.85rem;
+          color: #666;
+          margin-right: 8px;
+        }
+
+        .total-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #4caf50;
+        }
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+    .empty-card {
+      .empty-state {
+        text-align: center;
+        padding: 64px 24px;
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+          color: #ccc;
+        }
+
+        h3 {
+          margin: 16px 0 8px;
+        }
+
+        p {
+          color: #666;
+          margin-bottom: 16px;
+        }
+      }
+    }
+
+    mat-paginator {
+      margin-top: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .reservation-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .reservation-footer {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+
+        .actions {
+          justify-content: center;
+        }
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .reservations-container {
+        padding: 16px 12px;
+      }
+
+      .page-header {
+        margin-bottom: 16px;
+
+        h1 {
+          font-size: 1.25rem;
+        }
+
+        .subtitle {
+          font-size: 0.9rem;
+        }
+      }
+
+      .reservation-header {
+        padding: 12px;
+
+        .header-left {
+          .reservation-number {
+            font-size: 0.95rem;
+          }
+        }
+
+        .type-badge {
+          font-size: 0.75rem;
+          padding: 3px 8px;
+        }
+      }
+
+      .reservation-content {
+        padding: 12px;
+      }
+
+      .item {
+        .item-image,
+        .item-placeholder {
+          width: 40px;
+          height: 40px;
+        }
+
+        .item-details {
+          .item-name {
+            font-size: 0.9rem;
+          }
+
+          .item-quantity {
+            font-size: 0.8rem;
+          }
+        }
+
+        .item-price {
+          font-size: 0.9rem;
+        }
+      }
+
+      .pickup-info {
+        padding: 12px;
+
+        .pickup-date {
+          font-size: 0.9rem;
+        }
+      }
+
+      .pickup-code {
+        padding: 12px;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+
+        .code-value {
+          font-size: 1.25rem;
+        }
+      }
+
+      .reservation-footer {
+        padding: 12px;
+
+        .total {
+          .total-value {
+            font-size: 1.1rem;
+          }
+        }
+
+        .actions {
+          flex-direction: column;
+
+          button {
+            width: 100%;
+          }
+        }
+      }
+
+      .empty-state {
+        padding: 40px 16px;
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+        }
+
+        h3 {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  `]
+})
+export class ClientReservationsComponent implements OnInit {
+  reservations = signal([]);
+  pagination = signal(null);
+  isLoading = signal(true);
+
+  currentTab = 0;
+
+  private statusFilters = [undefined, 'pending', 'confirmed', 'ready', 'collected,cancelled,expired'];
+
+  constructor(
+    private reservationService: ReservationService,
+    private snackBar: MatSnackBar
+  ) {}
+
+  ngOnInit() {
+    this.loadReservations();
+  }
+
+  loadReservations(page = 1) {
+    this.isLoading.set(true);
+
+    const filters = { page, limit: 10 };
+    const statusFilter = this.statusFilters[this.currentTab];
+    if (statusFilter) filters['status'] = statusFilter;
+
+    this.reservationService.getUserReservations(filters).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.reservations.set(response.data.reservations);
+          this.pagination.set(response.data.pagination);
+        }
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onTabChange(index) {
+    this.currentTab = index;
+    this.loadReservations();
+  }
+
+  onPageChange(event) {
+    this.loadReservations(event.pageIndex + 1);
+  }
+
+  getShopName(shop) {
+    if (typeof shop === 'object' && shop?.name) {
+      return shop.name;
+    }
+    return 'Boutique';
+  }
+
+  getStatusLabel(status) {
+    const labels = {
+      pending: 'En attente',
+      confirmed: 'Confirmée',
+      ready: 'Prête',
+      collected: 'Récupérée',
+      cancelled: 'Annulée',
+      expired: 'Expirée'
+    };
+    return labels[status] || status;
+  }
+
+  cancelReservation(reservation) {
+    const reason = prompt('Raison de l\'annulation (optionnel):');
+    if (reason === null) return;
+
+    this.reservationService.cancelUserReservation(reservation._id, reason || undefined).subscribe({
+      next: () => {
+        this.snackBar.open('Réservation annulée', 'OK', { duration: 3000 });
+        this.loadReservations();
+      },
+      error: () => {
+        this.snackBar.open('Erreur lors de l\'annulation', 'OK', { duration: 3000 });
+      }
+    });
+  }
+}

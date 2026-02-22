@@ -1,0 +1,136 @@
+// Shop Manager Module Theme - Amber/Orange
+// Energetic, commercial, action-driven business experience
+
+:host {
+  // Primary Colors - Amber
+  --module-primary: #f59e0b;
+  --module-primary-dark: #d97706;
+  --module-primary-light: #fef3c7;
+  --module-primary-50: #fffbeb;
+
+  // Gradients
+  --module-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --module-gradient-light: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+
+  // Header
+  --header-bg: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  --header-text: #ffffff;
+
+  // Sidebar
+  --sidebar-bg: #1f2937;
+  --sidebar-text: #9ca3af;
+  --sidebar-active-bg: rgba(245, 158, 11, 0.15);
+  --sidebar-active-text: #f59e0b;
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+
+  // Buttons
+  --btn-primary-bg: linear-gradient(135deg, #f59e0b, #d97706);
+  --btn-primary-hover: linear-gradient(135deg, #d97706, #b45309);
+  --btn-primary-shadow: rgba(245, 158, 11, 0.4);
+
+  // Cards
+  --card-hover-shadow: 0 8px 30px rgba(245, 158, 11, 0.15);
+  --card-accent: #f59e0b;
+
+  // Quick Actions
+  --quick-action-bg: linear-gradient(135deg, #fef3c7, #fde68a);
+  --quick-action-text: #92400e;
+  --quick-action-hover: linear-gradient(135deg, #fde68a, #fcd34d);
+
+  // Status Chips
+  --status-pending-bg: #fef3c7;
+  --status-pending-text: #92400e;
+  --status-confirmed-bg: #dbeafe;
+  --status-confirmed-text: #1e40af;
+  --status-preparing-bg: #fce7f3;
+  --status-preparing-text: #9d174d;
+  --status-ready-bg: #d1fae5;
+  --status-ready-text: #065f46;
+  --status-delivered-bg: #d1fae5;
+  --status-delivered-text: #047857;
+  --status-cancelled-bg: #fee2e2;
+  --status-cancelled-text: #991b1b;
+
+  // Stat Card Icons
+  --stat-icon-1: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); // Revenue
+  --stat-icon-2: linear-gradient(135deg, #ec4899 0%, #db2777 100%); // Orders
+  --stat-icon-3: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); // Products
+  --stat-icon-4: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); // Average
+
+  // POS Button
+  --pos-btn-bg: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --pos-btn-hover: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+// Override primary button styles
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background: var(--btn-primary-bg) !important;
+
+  &:hover {
+    background: var(--btn-primary-hover) !important;
+    box-shadow: 0 4px 12px var(--btn-primary-shadow);
+  }
+}
+
+// Card hover effects
+.mat-mdc-card:hover {
+  box-shadow: var(--card-hover-shadow);
+}
+
+// Links
+a {
+  color: var(--module-primary);
+
+  &:hover {
+    color: var(--module-primary-dark);
+  }
+}
+
+// Status chips
+.status-chip, .status-badge, mat-chip {
+  &.status-pending, &[class*="pending"] {
+    background: var(--status-pending-bg) !important;
+    color: var(--status-pending-text) !important;
+  }
+  &.status-confirmed, &[class*="confirmed"] {
+    background: var(--status-confirmed-bg) !important;
+    color: var(--status-confirmed-text) !important;
+  }
+  &.status-preparing, &[class*="preparing"] {
+    background: var(--status-preparing-bg) !important;
+    color: var(--status-preparing-text) !important;
+  }
+  &.status-ready, &[class*="ready"] {
+    background: var(--status-ready-bg) !important;
+    color: var(--status-ready-text) !important;
+  }
+  &.status-delivered, &[class*="delivered"] {
+    background: var(--status-delivered-bg) !important;
+    color: var(--status-delivered-text) !important;
+  }
+  &.status-cancelled, &[class*="cancelled"] {
+    background: var(--status-cancelled-bg) !important;
+    color: var(--status-cancelled-text) !important;
+  }
+}
+
+// Quick action buttons
+.quick-action-btn {
+  background: var(--quick-action-bg);
+  color: var(--quick-action-text);
+
+  &:hover {
+    background: var(--quick-action-hover);
+  }
+}
+
+// POS button special styling
+.pos-btn {
+  background: var(--pos-btn-bg) !important;
+  color: white !important;
+
+  &:hover {
+    background: var(--pos-btn-hover) !important;
+  }
+}

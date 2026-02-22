@@ -1,0 +1,497 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+
+@Component({
+  selector: 'app-footer',
+  standalone: true,
+  imports: [CommonModule, RouterLink, MatIconModule],
+  template: `
+    <footer class="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="footer-grid">
+            <!-- Brand Section -->
+            <div class="footer-brand">
+              <div class="brand-logo">
+                <mat-icon>storefront</mat-icon>
+                <span>Bazar'Be</span>
+              </div>
+              <p class="brand-description">
+                Votre destination shopping en ligne. Découvrez les meilleures boutiques et profitez d'offres exclusives chaque jour.
+              </p>
+              <div class="social-links">
+                <a href="#" class="social-link" title="Facebook">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                  </svg>
+                </a>
+                <a href="#" class="social-link" title="Instagram">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="17.5" cy="6.5" r="1.5"/>
+                  </svg>
+                </a>
+                <a href="#" class="social-link" title="Twitter">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                  </svg>
+                </a>
+                <a href="#" class="social-link" title="YouTube">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.33z" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Shop Links -->
+            <div class="footer-section">
+              <h4>Boutiques</h4>
+              <ul>
+                <li><a routerLink="/catalog">Toutes les boutiques</a></li>
+                <li><a routerLink="/catalog" [queryParams]="{featured: true}">Boutiques en vedette</a></li>
+                <li><a routerLink="/catalog" [queryParams]="{promo: true}">Promotions</a></li>
+                <li><a routerLink="/catalog" [queryParams]="{new: true}">Nouveautés</a></li>
+              </ul>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="footer-section">
+              <h4>Service client</h4>
+              <ul>
+                <li><a href="#">Centre d'aide</a></li>
+                <li><a href="#">Suivi de commande</a></li>
+                <li><a href="#">Livraison & retours</a></li>
+                <li><a href="#">Modes de paiement</a></li>
+              </ul>
+            </div>
+
+            <!-- Business -->
+            <div class="footer-section">
+              <h4>Professionnels</h4>
+              <ul>
+                <li><a routerLink="/auth/register" [queryParams]="{role: 'shop'}">Devenir vendeur</a></li>
+                <li><a href="#">Espace partenaires</a></li>
+                <li><a href="#">Solutions entreprise</a></li>
+                <li><a href="#">Publicité</a></li>
+              </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="footer-section">
+              <h4>Contact</h4>
+              <div class="contact-item">
+                <mat-icon>email</mat-icon>
+                <span>contact&#64;centrecommercial.fr</span>
+              </div>
+              <div class="contact-item">
+                <mat-icon>phone</mat-icon>
+                <span>01 23 45 67 89</span>
+              </div>
+              <div class="contact-item">
+                <mat-icon>schedule</mat-icon>
+                <span>Lun-Ven: 9h-18h</span>
+              </div>
+              <div class="newsletter">
+                <p>Inscrivez-vous à notre newsletter</p>
+                <div class="newsletter-form">
+                  <input type="email" placeholder="Votre email">
+                  <button>
+                    <mat-icon>send</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="container">
+          <div class="footer-bottom-content">
+            <p class="copyright">
+              &copy; {{ currentYear }} Bazar'Be. Tous droits réservés.
+            </p>
+            <div class="footer-legal">
+              <a href="#">Mentions légales</a>
+              <a href="#">CGV</a>
+              <a href="#">Confidentialité</a>
+              <a href="#">Cookies</a>
+            </div>
+            <div class="payment-methods">
+              <span class="payment-label">Paiement sécurisé</span>
+              <div class="payment-icons">
+                <mat-icon>credit_card</mat-icon>
+                <mat-icon>account_balance</mat-icon>
+                <mat-icon>payments</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  `,
+  styles: [`
+    .footer {
+      margin-top: auto;
+    }
+
+    .footer-top {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      padding: 64px 0 48px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(4, 1fr);
+      gap: 48px;
+    }
+
+    /* Brand Section */
+    .footer-brand {
+      padding-right: 32px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #667eea;
+      }
+
+      span {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+      }
+    }
+
+    .brand-description {
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.7;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      &:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+      }
+    }
+
+    /* Footer Sections */
+    .footer-section {
+      h4 {
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 12px;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 32px;
+          height: 2px;
+          background: linear-gradient(90deg, #667eea, #764ba2);
+          border-radius: 1px;
+        }
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin-bottom: 12px;
+
+          a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+
+            &:hover {
+              color: white;
+              padding-left: 4px;
+            }
+          }
+        }
+      }
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #667eea;
+      }
+    }
+
+    .newsletter {
+      margin-top: 20px;
+
+      p {
+        color: white;
+        font-size: 0.85rem;
+        margin-bottom: 12px;
+      }
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 8px;
+
+      input {
+        flex: 1;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all 0.3s ease;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        &:focus {
+          border-color: #667eea;
+          background: rgba(255, 255, 255, 0.15);
+        }
+      }
+
+      button {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: scale(1.05);
+        }
+
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+
+    /* Footer Bottom */
+    .footer-bottom {
+      background: #0f0f1a;
+      padding: 20px 0;
+    }
+
+    .footer-bottom-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .copyright {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    .footer-legal {
+      display: flex;
+      gap: 24px;
+
+      a {
+        color: rgba(255, 255, 255, 0.4);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: white;
+        }
+      }
+    }
+
+    .payment-methods {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .payment-label {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+    }
+
+    .payment-icons {
+      display: flex;
+      gap: 8px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .footer-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+      }
+
+      .footer-brand {
+        grid-column: span 3;
+        padding-right: 0;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 32px;
+        margin-bottom: 16px;
+      }
+
+      .social-links {
+        justify-content: center;
+      }
+
+      .footer-bottom-content {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .footer-top {
+        padding: 48px 0 32px;
+      }
+
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+
+      .footer-brand {
+        grid-column: span 2;
+      }
+
+      .footer-section {
+        h4 {
+          font-size: 0.95rem;
+        }
+      }
+
+      .footer-legal {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .payment-methods {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-brand {
+        grid-column: span 1;
+      }
+
+      .footer-section {
+        text-align: center;
+
+        h4::after {
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        ul li a:hover {
+          padding-left: 0;
+        }
+      }
+
+      .contact-item {
+        justify-content: center;
+      }
+
+      .newsletter-form {
+        flex-direction: column;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  `]
+})
+export class FooterComponent {
+  currentYear = new Date().getFullYear();
+}
