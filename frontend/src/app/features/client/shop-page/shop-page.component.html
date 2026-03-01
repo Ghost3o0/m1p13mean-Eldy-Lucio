@@ -1,0 +1,152 @@
+﻿    @if (isLoading()) {
+      <app-loading message="Chargement de la boutique..." fullscreen></app-loading>
+    }
+
+    @if (!isLoading() && error()) {
+      <div class="error-container">
+        <mat-icon>error_outline</mat-icon>
+        <h2>{{ error() }}</h2>
+        <a routerLink="/" mat-raised-button color="primary">
+          Retour à l'accueil
+        </a>
+      </div>
+    }
+
+    @if (!isLoading() && !error() && shop()) {
+      <div class="shop-page" [style.--shop-primary]="getThemeColor('primary')" [style.--shop-secondary]="getThemeColor('secondary')">
+        <!-- Hero Section -->
+        @if (landing()?.hero?.enabled) {
+          <section class="hero-section" [style.backgroundImage]="getHeroBackground()">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+              <h1>{{ landing()?.hero?.title || shop()?.name }}</h1>
+              @if (landing()?.hero?.subtitle) {
+                <p class="hero-subtitle">{{ landing()?.hero?.subtitle }}</p>
+              }
+              @if (landing()?.hero?.ctaText) {
+                <a [routerLink]="landing()?.hero?.ctaLink || '/catalog'"
+                   [queryParams]="{shop: shop()?._id}"
+                   mat-raised-button color="primary" class="cta-btn">
+                  {{ landing()?.hero?.ctaText }}
+                </a>
+              }
+            </div>
+          </section>
+        } @else {
+          <section class="simple-header">
+            <div class="shop-logo">
+              @if (shop()?.logo) {
+                <img [src]="shop()?.logo" [alt]="shop()?.name">
+              } @else {
+                <mat-icon>store</mat-icon>
+              }
+            </div>
+            <h1>{{ shop()?.name }}</h1>
+            @if (shop()?.rating?.count) {
+              <div class="shop-rating">
+                <mat-icon>star</mat-icon>
+                <span>{{ shop()?.rating?.average?.toFixed(1) }}</span>
+                <span class="count">({{ shop()?.rating?.count }} avis)</span>
+              </div>
+            }
+          </section>
+        }
+
+        <!-- Navigation Tabs -->
+        <mat-tab-group class="shop-tabs">
+          <mat-tab label="Produits">
+            <div class="tab-content">
+              @if (products().length === 0) {
+                <div class="empty-products">
+                  <mat-icon>inventory_2</mat-icon>
+                  <p>Aucun produit disponible pour le moment.</p>
+                </div>
+              } @else {
+                <div class="products-grid">
+                  @for (product of products(); track product._id) {
+                    <mat-card class="product-card" [routerLink]="['/product', product._id]">
+                      <div class="product-image">
+                        <img [src]="product.images[0] || '/assets/placeholder.png'" [alt]="product.name">
+                        @if (product.compareAtPrice && product.compareAtPrice > product.basePrice) {
+                          <span class="discount-badge">
+                            -{{ getDiscountPercent(product) }}%
+                          </span>
+                        }
+                      </div>
+                      <mat-card-content>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <div class="product-price">
+                          <span class="current-price">{{ product.basePrice | ariary }}</span>
+                          @if (product.compareAtPrice && product.compareAtPrice > product.basePrice) {
+                            <span class="old-price">{{ product.compareAtPrice | ariary }}</span>
+                          }
+                        </div>
+                      </mat-card-content>
+                    </mat-card>
+                  }
+                </div>
+                <div class="view-all">
+                  <a [routerLink]="['/catalog']" [queryParams]="{shop: shop()?._id}" mat-stroked-button>
+                    Voir tous les produits
+                    <mat-icon>arrow_forward</mat-icon>
+                  </a>
+                </div>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="À propos">
+            <div class="tab-content about-section">
+              @if (landing()?.shopContent?.aboutUs) {
+                <p>{{ landing()?.shopContent?.aboutUs }}</p>
+              } @else {
+                <p>Aucune description disponible.</p>
+              }
+
+              @if (landing()?.shopContent?.promotionalText) {
+                <div class="promo-banner">
+                  <mat-icon>local_offer</mat-icon>
+                  <span>{{ landing()?.shopContent?.promotionalText }}</span>
+                </div>
+              }
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Contact">
+            <div class="tab-content contact-section">
+              <div class="contact-info">
+                @if (shop()?.contact?.phone) {
+                  <div class="contact-item">
+                    <mat-icon>phone</mat-icon>
+                    <span>{{ shop()?.contact?.phone }}</span>
+                  </div>
+                }
+                @if (shop()?.contact?.email) {
+                  <div class="contact-item">
+                    <mat-icon>email</mat-icon>
+                    <a [href]="'mailto:' + shop()?.contact?.email">{{ shop()?.contact?.email }}</a>
+                  </div>
+                }
+              </div>
+
+              @if (shop()?.hours?.length) {
+                <div class="opening-hours">
+                  <h4>Horaires d'ouverture</h4>
+                  @for (hour of shop()?.hours; track hour.day) {
+                    <div class="hour-row" [class.closed]="hour.closed">
+                      <span class="day">{{ getDayName(hour.day) }}</span>
+                      @if (hour.closed) {
+                        <span class="time">Fermé</span>
+                      } @else {
+                        <span class="time">{{ hour.open }} - {{ hour.close }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+    }
+  

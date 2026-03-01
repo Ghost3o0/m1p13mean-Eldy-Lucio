@@ -1,0 +1,347 @@
+﻿    <div class="checkout-container container">
+      <h1>Finaliser la commande</h1>
+
+      @if (cartService.isLoading()) {
+        <app-loading message="Chargement..."></app-loading>
+      }
+
+      @if (!cartService.isLoading() && (!cart() || cart()!.items.length === 0)) {
+        <div class="empty-cart">
+          <mat-icon>shopping_cart</mat-icon>
+          <h2>Votre panier est vide</h2>
+          <p>Ajoutez des articles à votre panier avant de passer commande.</p>
+          <a routerLink="/catalog" mat-raised-button color="primary">
+            Explorer le catalogue
+          </a>
+        </div>
+      }
+
+      @if (!cartService.isLoading() && cart() && cart()!.items.length > 0) {
+        <div class="checkout-content">
+          <mat-stepper linear #stepper>
+            <!-- Step 1: Delivery Method -->
+            <mat-step [stepControl]="deliveryForm" label="Mode de livraison">
+              <form [formGroup]="deliveryForm">
+                <h3>Comment souhaitez-vous recevoir votre commande ?</h3>
+
+                <mat-radio-group formControlName="deliveryMethod" class="delivery-options">
+                  <mat-card class="delivery-option" [class.selected]="deliveryForm.get('deliveryMethod')?.value === 'delivery'">
+                    <mat-radio-button value="delivery">
+                      <div class="option-content">
+                        <mat-icon>local_shipping</mat-icon>
+                        <div class="option-text">
+                          <strong>Livraison à domicile</strong>
+                          <span>Recevez votre commande à l'adresse de votre choix</span>
+                          <span class="price">{{ getDeliveryFee() | ariary }}</span>
+                        </div>
+                      </div>
+                    </mat-radio-button>
+                  </mat-card>
+
+                  <mat-card class="delivery-option" [class.selected]="deliveryForm.get('deliveryMethod')?.value === 'pickup'">
+                    <mat-radio-button value="pickup">
+                      <div class="option-content">
+                        <mat-icon>store</mat-icon>
+                        <div class="option-text">
+                          <strong>Retrait en boutique</strong>
+                          <span>Récupérez votre commande directement en magasin</span>
+                          <span class="price free">Gratuit</span>
+                        </div>
+                      </div>
+                    </mat-radio-button>
+                  </mat-card>
+                </mat-radio-group>
+
+                <div class="step-actions">
+                  <button mat-raised-button color="primary" matStepperNext [disabled]="deliveryForm.invalid">
+                    Continuer
+                  </button>
+                </div>
+              </form>
+            </mat-step>
+
+            <!-- Step 2: Address -->
+            <mat-step [completed]="!isDelivery() || addressForm.valid || selectedAddressId !== 'new'" label="Adresse">
+              <form [formGroup]="addressForm">
+                @if (isDelivery()) {
+                  <h3>Adresse de livraison</h3>
+
+                  @if (savedAddresses().length > 0) {
+                    <div class="saved-addresses">
+                      <h4>Adresses enregistrées</h4>
+                      <mat-radio-group [(ngModel)]="selectedAddressId" [ngModelOptions]="{standalone: true}" class="address-list">
+                        @for (address of savedAddresses(); track address.label) {
+                          <mat-card class="address-card" [class.selected]="selectedAddressId === address.label" (click)="selectAddress(address)">
+                            <mat-radio-button [value]="address.label">
+                              <strong>{{ address.label }}</strong>
+                              <p>{{ address.street }}</p>
+                              <p>{{ address.zipCode }} {{ address.city }}</p>
+                            </mat-radio-button>
+                          </mat-card>
+                        }
+                        <mat-card class="address-card new-address" [class.selected]="selectedAddressId === 'new'" (click)="selectedAddressId = 'new'">
+                          <mat-radio-button value="new">
+                            <mat-icon>add</mat-icon>
+                            <span>Nouvelle adresse</span>
+                          </mat-radio-button>
+                        </mat-card>
+                      </mat-radio-group>
+                    </div>
+                  }
+
+                  @if (selectedAddressId === 'new' || savedAddresses().length === 0) {
+                    <div class="address-form">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Nom de l'adresse</mat-label>
+                        <input matInput formControlName="label" placeholder="Ex: Maison, Bureau">
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Adresse</mat-label>
+                        <input matInput formControlName="street">
+                        @if (addressForm.get('street')?.hasError('required') && addressForm.get('street')?.touched) {
+                          <mat-error>L'adresse est requise</mat-error>
+                        }
+                      </mat-form-field>
+
+                      <div class="form-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Code postal</mat-label>
+                          <input matInput formControlName="zipCode">
+                          @if (addressForm.get('zipCode')?.hasError('required') && addressForm.get('zipCode')?.touched) {
+                            <mat-error>Requis</mat-error>
+                          }
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                          <mat-label>Ville</mat-label>
+                          <input matInput formControlName="city">
+                          @if (addressForm.get('city')?.hasError('required') && addressForm.get('city')?.touched) {
+                            <mat-error>Requis</mat-error>
+                          }
+                        </mat-form-field>
+                      </div>
+
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Téléphone</mat-label>
+                        <input matInput formControlName="phone" type="tel">
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Instructions de livraison (optionnel)</mat-label>
+                        <textarea matInput formControlName="instructions" rows="2"></textarea>
+                      </mat-form-field>
+                    </div>
+                  }
+                } @else {
+                  <h3>Retrait en boutique</h3>
+                    <p class="pickup-info">
+                    Vous pourrez récupérer votre commande dans les boutiques concernées une fois qu'elle sera prête.
+                    Vous recevrez un email avec les détails.
+                  </p>
+                }
+
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>Retour</button>
+                  <button mat-raised-button color="primary" matStepperNext [disabled]="isDelivery() && addressForm.invalid && selectedAddressId === 'new'">
+                    Continuer
+                  </button>
+                </div>
+              </form>
+            </mat-step>
+
+            <!-- Step 3: Payment -->
+            <mat-step [completed]="!isDelivery() || paymentForm.valid" label="Paiement">
+              <form [formGroup]="paymentForm">
+                <h3>Mode de paiement</h3>
+
+                @if (isDelivery()) {
+                  <mat-radio-group formControlName="paymentMethod" class="payment-options">
+                    <mat-card class="payment-option" [class.selected]="paymentForm.get('paymentMethod')?.value === 'card'">
+                      <mat-radio-button value="card">
+                        <div class="option-content">
+                          <mat-icon>credit_card</mat-icon>
+                          <div class="option-text">
+                            <strong>Carte bancaire</strong>
+                            <span>Visa, Mastercard, CB</span>
+                          </div>
+                        </div>
+                      </mat-radio-button>
+                    </mat-card>
+
+                    <mat-card class="payment-option" [class.selected]="paymentForm.get('paymentMethod')?.value === 'paypal'">
+                      <mat-radio-button value="paypal">
+                        <div class="option-content">
+                          <mat-icon>account_balance_wallet</mat-icon>
+                          <div class="option-text">
+                            <strong>PayPal</strong>
+                            <span>Paiement sécurisé via PayPal</span>
+                          </div>
+                        </div>
+                      </mat-radio-button>
+                    </mat-card>
+                  </mat-radio-group>
+                } @else {
+                  <div class="pickup-payment-info">
+                    <mat-card class="payment-option selected">
+                      <div class="option-content">
+                        <mat-icon>store</mat-icon>
+                        <div class="option-text">
+                          <strong>Paiement sur place</strong>
+                          <span>Vous paierez lors du retrait de votre commande en boutique</span>
+                          <span class="payment-methods-accepted">Espèces, Carte, Mobile Money acceptés</span>
+                        </div>
+                      </div>
+                    </mat-card>
+                  </div>
+                }
+
+                @if (isDelivery() && paymentForm.get('paymentMethod')?.value === 'card') {
+                  <div class="card-form">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Numéro de carte</mat-label>
+                      <input matInput formControlName="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                      <mat-icon matSuffix>credit_card</mat-icon>
+                    </mat-form-field>
+
+                    <div class="form-row">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Date d'expiration</mat-label>
+                        <input matInput formControlName="cardExpiry" placeholder="MM/YY" maxlength="5">
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>CVV</mat-label>
+                        <input matInput formControlName="cardCvv" placeholder="123" maxlength="4" type="password">
+                      </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Nom sur la carte</mat-label>
+                      <input matInput formControlName="cardName">
+                    </mat-form-field>
+                  </div>
+                }
+
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>Retour</button>
+                  <button mat-raised-button color="primary" matStepperNext [disabled]="isDelivery() && paymentForm.invalid">
+                    Continuer
+                  </button>
+                </div>
+              </form>
+            </mat-step>
+
+            <!-- Step 4: Review -->
+            <mat-step label="Confirmation">
+              <h3>Récapitulatif de votre commande</h3>
+
+              <div class="order-review">
+                <!-- Items -->
+                <mat-card class="review-section">
+                  <h4>Articles ({{ cart()!.itemCount }})</h4>
+                  @for (item of cart()!.items; track item._id) {
+                    <div class="review-item">
+                      <img [src]="item.product?.images?.[0] || '/assets/placeholder.png'" [alt]="item.product?.name">
+                      <div class="item-info">
+                        <span class="item-name">{{ item.product?.name || 'Produit' }}</span>
+                        <span class="item-qty">Qté: {{ item.quantity }}</span>
+                      </div>
+                      <span class="item-price">{{ item.unitPrice * item.quantity | ariary }}</span>
+                    </div>
+                  }
+                </mat-card>
+
+                <!-- Delivery -->
+                <mat-card class="review-section">
+                  <h4>{{ isDelivery() ? 'Livraison' : 'Retrait' }}</h4>
+                  @if (isDelivery()) {
+                    <p>
+                      {{ getSelectedAddress()?.street }}<br>
+                      {{ getSelectedAddress()?.zipCode }} {{ getSelectedAddress()?.city }}
+                    </p>
+                  } @else {
+                    <p>Retrait en boutique</p>
+                  }
+                </mat-card>
+
+                <!-- Payment -->
+                <mat-card class="review-section">
+                  <h4>Paiement</h4>
+                  <p>
+                    @if (!isDelivery()) {
+                      Paiement sur place au retrait
+                    } @else {
+                      @switch (paymentForm.get('paymentMethod')?.value) {
+                        @case ('card') { Carte bancaire }
+                        @case ('paypal') { PayPal }
+                      }
+                    }
+                  </p>
+                </mat-card>
+
+                <!-- Notes -->
+                <mat-form-field appearance="outline" class="full-width notes-field">
+                  <mat-label>Notes (optionnel)</mat-label>
+                  <textarea matInput [(ngModel)]="orderNotes" rows="2" placeholder="Instructions spéciales..."></textarea>
+                </mat-form-field>
+              </div>
+
+              <div class="step-actions">
+                <button mat-button matStepperPrevious>Retour</button>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  class="place-order-btn"
+                  (click)="placeOrder()"
+                  [disabled]="isProcessing()">
+                  @if (isProcessing()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                    Traitement...
+                  } @else {
+                    Confirmer la commande - {{ calculateTotal() | ariary }}
+                  }
+                </button>
+              </div>
+            </mat-step>
+          </mat-stepper>
+
+          <!-- Order Summary Sidebar -->
+          <div class="order-summary">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Récapitulatif</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="summary-row">
+                  <span>Sous-total ({{ cart()!.itemCount }} articles)</span>
+                  <span>{{ cart()!.subtotal | ariary }}</span>
+                </div>
+                @if (cart()!.discount && cart()!.discount! > 0) {
+                  <div class="summary-row discount">
+                    <span>Réduction</span>
+                    <span>-{{ cart()!.discount | ariary }}</span>
+                  </div>
+                }
+                <div class="summary-row">
+                  <span>Livraison</span>
+                  <span>{{ getDeliveryFee() | ariary }}</span>
+                </div>
+                <mat-divider></mat-divider>
+                <div class="summary-row total">
+                  <span>Total</span>
+                  <span>{{ calculateTotal() | ariary }}</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Security badges -->
+            <div class="security-info">
+              <mat-icon>lock</mat-icon>
+              <span>Paiement 100% sécurisé</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  

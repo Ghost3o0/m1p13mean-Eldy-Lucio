@@ -1,0 +1,127 @@
+﻿    <footer class="footer">
+      <div class="footer-top">
+        <div class="container">
+          <div class="footer-grid">
+            <!-- Brand Section -->
+            <div class="footer-brand">
+              <div class="brand-logo">
+                <mat-icon>storefront</mat-icon>
+                <span>Bazar'Be</span>
+              </div>
+              <p class="brand-description">
+                Votre destination shopping en ligne. Découvrez les meilleures boutiques et profitez d'offres exclusives chaque jour.
+              </p>
+              <div class="social-links">
+                <a href="#" class="social-link" title="Facebook">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                  </svg>
+                </a>
+                <a href="#" class="social-link" title="Instagram">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="17.5" cy="6.5" r="1.5"/>
+                  </svg>
+                </a>
+                <a href="#" class="social-link" title="Twitter">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                  </svg>
+                </a>
+                <a href="#" class="social-link" title="YouTube">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.33z" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Shop Links -->
+            <div class="footer-section">
+              <h4>Boutiques</h4>
+              <ul>
+                <li><a routerLink="/catalog">Toutes les boutiques</a></li>
+                <li><a routerLink="/catalog" [queryParams]="{featured: true}">Boutiques en vedette</a></li>
+                <li><a routerLink="/catalog" [queryParams]="{promo: true}">Promotions</a></li>
+                <li><a routerLink="/catalog" [queryParams]="{new: true}">Nouveautés</a></li>
+              </ul>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="footer-section">
+              <h4>Service client</h4>
+              <ul>
+                <li><a href="#">Centre d'aide</a></li>
+                <li><a href="#">Suivi de commande</a></li>
+                <li><a href="#">Livraison & retours</a></li>
+                <li><a href="#">Modes de paiement</a></li>
+              </ul>
+            </div>
+
+            <!-- Business -->
+            <div class="footer-section">
+              <h4>Professionnels</h4>
+              <ul>
+                <li><a routerLink="/auth/register" [queryParams]="{role: 'shop'}">Devenir vendeur</a></li>
+                <li><a href="#">Espace partenaires</a></li>
+                <li><a href="#">Solutions entreprise</a></li>
+                <li><a href="#">Publicité</a></li>
+              </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="footer-section">
+              <h4>Contact</h4>
+              <div class="contact-item">
+                <mat-icon>email</mat-icon>
+                <span>contact&#64;centrecommercial.fr</span>
+              </div>
+              <div class="contact-item">
+                <mat-icon>phone</mat-icon>
+                <span>01 23 45 67 89</span>
+              </div>
+              <div class="contact-item">
+                <mat-icon>schedule</mat-icon>
+                <span>Lun-Ven: 9h-18h</span>
+              </div>
+              <div class="newsletter">
+                <p>Inscrivez-vous à notre newsletter</p>
+                <div class="newsletter-form">
+                  <input type="email" placeholder="Votre email">
+                  <button>
+                    <mat-icon>send</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="container">
+          <div class="footer-bottom-content">
+            <p class="copyright">
+              &copy; {{ currentYear }} Bazar'Be. Tous droits réservés.
+            </p>
+            <div class="footer-legal">
+              <a href="#">Mentions légales</a>
+              <a href="#">CGV</a>
+              <a href="#">Confidentialité</a>
+              <a href="#">Cookies</a>
+            </div>
+            <div class="payment-methods">
+              <span class="payment-label">Paiement sécurisé</span>
+              <div class="payment-icons">
+                <mat-icon>credit_card</mat-icon>
+                <mat-icon>account_balance</mat-icon>
+                <mat-icon>payments</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  

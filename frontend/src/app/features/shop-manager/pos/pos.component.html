@@ -1,0 +1,321 @@
+﻿    <div class="pos-container">
+      <!-- Header -->
+      <div class="pos-header">
+        <div class="header-left">
+          <h1>
+            <mat-icon>point_of_sale</mat-icon>
+            Caisse
+          </h1>
+          <span class="date">{{ currentDate | date:'EEEE d MMMM yyyy' }}</span>
+        </div>
+        <div class="header-right">
+          @if (posService.summary()) {
+            <div class="daily-stats">
+              <span class="stat">
+                <mat-icon>receipt</mat-icon>
+                {{ posService.summary()?.totalOrders }} ventes
+              </span>
+              <span class="stat revenue">
+                <mat-icon>euro</mat-icon>
+                {{ posService.summary()?.totalRevenue | ariary }}
+              </span>
+            </div>
+          }
+          <button mat-stroked-button (click)="showHistory = true">
+            <mat-icon>history</mat-icon>
+            Historique
+          </button>
+        </div>
+      </div>
+
+      <div class="pos-content">
+        <!-- Products Section -->
+        <div class="products-section">
+          <!-- Search -->
+          <div class="search-box">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>Rechercher un produit</mat-label>
+              <input matInput
+                     [(ngModel)]="searchTerm"
+                     (keyup.enter)="searchProducts()"
+                     placeholder="Nom, SKU ou code-barres">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="searchProducts()">
+              Rechercher
+            </button>
+          </div>
+
+          <!-- Products Grid -->
+          <div class="products-grid">
+            @if (posService.isLoading()) {
+              <div class="loading">
+                <mat-spinner diameter="40"></mat-spinner>
+                <span>Chargement...</span>
+              </div>
+            } @else if (posService.products().length === 0) {
+              <div class="empty-products">
+                <mat-icon>inventory_2</mat-icon>
+                <p>Recherchez un produit pour commencer</p>
+              </div>
+            } @else {
+              @for (product of posService.products(); track product.productId + product.optionId) {
+                <mat-card class="product-card"
+                          [class.out-of-stock]="product.stock <= 0"
+                          (click)="product.stock > 0 && addToCart(product)">
+                  <div class="product-image">
+                    @if (product.image) {
+                      <img [src]="getImageUrl(product.image)" [alt]="product.name">
+                    } @else {
+                      <mat-icon>image</mat-icon>
+                    }
+                    @if (product.stock <= 0) {
+                      <div class="stock-overlay">Rupture</div>
+                    } @else if (product.stock <= 5) {
+                      <div class="stock-badge">{{ product.stock }}</div>
+                    }
+                  </div>
+                  <div class="product-info">
+                    <span class="product-name">{{ product.name }}</span>
+                    @if (product.variantName) {
+                      <span class="variant">{{ product.variantName }}</span>
+                    }
+                    <span class="price">{{ product.price | ariary }}</span>
+                  </div>
+                </mat-card>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div class="cart-section">
+          <div class="cart-header">
+            <h2>
+              <mat-icon [matBadge]="posService.getCartItemCount()" matBadgeColor="accent">shopping_cart</mat-icon>
+              Panier
+            </h2>
+            @if (posService.cart().length > 0) {
+              <button mat-icon-button color="warn" (click)="clearCart()" matTooltip="Vider le panier">
+                <mat-icon>delete_sweep</mat-icon>
+              </button>
+            }
+          </div>
+
+          <div class="cart-items">
+            @if (posService.cart().length === 0) {
+              <div class="empty-cart">
+                <mat-icon>remove_shopping_cart</mat-icon>
+                <p>Panier vide</p>
+              </div>
+            } @else {
+              @for (item of posService.cart(); track $index) {
+                <div class="cart-item">
+                  <div class="item-info">
+                    <span class="item-name">{{ item.name }}</span>
+                    @if (item.variantName) {
+                      <span class="item-variant">{{ item.variantName }}</span>
+                    }
+                    <span class="item-price">{{ item.price | ariary }}</span>
+                  </div>
+                  <div class="item-quantity">
+                    <button mat-icon-button (click)="updateQuantity($index, item.quantity - 1)">
+                      <mat-icon>remove</mat-icon>
+                    </button>
+                    <span class="qty">{{ item.quantity }}</span>
+                    <button mat-icon-button
+                            (click)="updateQuantity($index, item.quantity + 1)"
+                            [disabled]="item.quantity >= item.stock">
+                      <mat-icon>add</mat-icon>
+                    </button>
+                  </div>
+                  <div class="item-total">
+                    {{ item.price * item.quantity | ariary }}
+                  </div>
+                  <button mat-icon-button color="warn" (click)="removeItem($index)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+            }
+          </div>
+
+          @if (posService.cart().length > 0) {
+            <mat-divider></mat-divider>
+
+            <div class="cart-summary">
+              <div class="total-row">
+                <span>Total</span>
+                <span class="total-amount">{{ posService.getCartTotal() | ariary }}</span>
+              </div>
+            </div>
+
+            <div class="payment-section">
+              <h3>Mode de paiement</h3>
+              <div class="payment-buttons">
+                <button mat-raised-button
+                        class="payment-btn cash"
+                        [class.selected]="selectedPayment === 'cash'"
+                        (click)="selectPayment('cash')">
+                  <mat-icon>payments</mat-icon>
+                  Espèces
+                </button>
+                <button mat-raised-button
+                        class="payment-btn card"
+                        [class.selected]="selectedPayment === 'card'"
+                        (click)="selectPayment('card')">
+                  <mat-icon>credit_card</mat-icon>
+                  Carte
+                </button>
+              </div>
+
+              @if (selectedPayment === 'cash') {
+                <div class="cash-section">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Montant reçu (€)</mat-label>
+                    <input matInput type="number" [(ngModel)]="cashReceived" min="0" step="0.01">
+                  </mat-form-field>
+                  @if (cashReceived && cashReceived >= posService.getCartTotal()) {
+                    <div class="change-display">
+                      Monnaie à rendre: <strong>{{ cashReceived - posService.getCartTotal() | ariary }}</strong>
+                    </div>
+                  }
+                </div>
+              }
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nom du client (optionnel)</mat-label>
+                <input matInput [(ngModel)]="customerName">
+              </mat-form-field>
+
+              <button mat-raised-button
+                      color="primary"
+                      class="validate-btn"
+                      [disabled]="!canValidate() || isProcessing()"
+                      (click)="validateSale()">
+                @if (isProcessing()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  <mat-icon>check_circle</mat-icon>
+                  Valider la vente
+                }
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Receipt Modal -->
+      @if (showReceipt()) {
+        <div class="modal-overlay" (click)="closeReceipt()">
+          <mat-card class="receipt-modal" (click)="$event.stopPropagation()">
+            <div class="receipt">
+                <div class="receipt-header">
+                <mat-icon class="success-icon">check_circle</mat-icon>
+                <h2>Vente enregistrée</h2>
+                <span class="order-number">N° {{ posService.lastOrder()?.orderNumber }}</span>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="receipt-items">
+                @for (item of posService.lastOrder()?.items; track item._id) {
+                  <div class="receipt-item">
+                    <span>{{ item.quantity }}x {{ item.name }}</span>
+                    <span>{{ item.total | ariary }}</span>
+                  </div>
+                }
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="receipt-total">
+                <span>TOTAL</span>
+                <span>{{ posService.lastOrder()?.total | ariary }}</span>
+              </div>
+
+              @if (posService.lastOrder()?.posData?.cashReceived) {
+                <div class="receipt-payment">
+                  <div>
+                    <span>Espèces reçues</span>
+                    <span>{{ posService.lastOrder()?.posData?.cashReceived | ariary }}</span>
+                  </div>
+                  <div>
+                    <span>Monnaie rendue</span>
+                    <span>{{ posService.lastOrder()?.posData?.changeGiven | ariary }}</span>
+                  </div>
+                </div>
+              }
+
+              <div class="receipt-footer">
+                <span>{{ posService.lastOrder()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span>{{ posService.lastOrder()?.posData?.cashierName }}</span>
+              </div>
+            </div>
+
+            <div class="receipt-actions">
+              <button mat-stroked-button (click)="printReceipt()">
+                <mat-icon>print</mat-icon>
+                Imprimer
+              </button>
+              <button mat-raised-button color="primary" (click)="closeReceipt()">
+                Nouvelle vente
+              </button>
+            </div>
+          </mat-card>
+        </div>
+      }
+
+      <!-- History Modal -->
+      @if (showHistory) {
+        <div class="modal-overlay" (click)="showHistory = false">
+          <mat-card class="history-modal" (click)="$event.stopPropagation()">
+            <mat-card-header>
+              <mat-card-title>Historique des ventes</mat-card-title>
+              <button mat-icon-button (click)="showHistory = false">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="history-filters">
+                <mat-form-field appearance="outline">
+                  <mat-label>Date</mat-label>
+                  <input matInput type="date" [(ngModel)]="historyDate" (change)="loadHistory()">
+                </mat-form-field>
+              </div>
+
+              <div class="history-list">
+                @for (order of posService.orders(); track order._id) {
+                  <div class="history-item">
+                    <div class="history-info">
+                      <span class="order-num">{{ order.orderNumber }}</span>
+                      <span class="order-time">{{ order.createdAt | date:'HH:mm' }}</span>
+                      <span class="order-customer">{{ order.posData?.customerName }}</span>
+                    </div>
+                    <div class="history-payment">
+                      <mat-chip>
+                        @if (order.payment.method === 'cash') {
+                          <mat-icon>payments</mat-icon>
+                        } @else {
+                          <mat-icon>credit_card</mat-icon>
+                        }
+                        {{ order.payment.method === 'cash' ? 'Espèces' : 'Carte' }}
+                      </mat-chip>
+                    </div>
+                    <div class="history-total">
+                      {{ order.total | ariary }}
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="empty-history">
+                    <mat-icon>receipt_long</mat-icon>
+                    <p>Aucune vente pour cette date</p>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+  

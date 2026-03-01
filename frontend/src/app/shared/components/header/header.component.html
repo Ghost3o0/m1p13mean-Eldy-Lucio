@@ -1,0 +1,189 @@
+﻿    <header class="header" [class.scrolled]="isScrolled()">
+      <div class="container header-content">
+        <!-- Logo -->
+        <a routerLink="/" class="logo">
+          <img src="/assets/logo.png" alt="Bazar'Be" class="logo-img">
+        </a>
+
+        <!-- Search Bar -->
+        <div class="search-bar">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Rechercher des produits, boutiques..." />
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav-links">
+          <a routerLink="/catalog" routerLinkActive="active">
+            <mat-icon>grid_view</mat-icon>
+            <span>Catalogue</span>
+          </a>
+          <a routerLink="/catalog" [queryParams]="{featured: true}" routerLinkActive="active">
+            <mat-icon>local_offer</mat-icon>
+            <span>Promos</span>
+          </a>
+        </nav>
+
+        <!-- Desktop Actions -->
+        <div class="actions desktop-actions">
+          <!-- Theme Toggle -->
+          <button class="action-btn theme-toggle-btn" (click)="themeService.toggleTheme()" [attr.aria-label]="'Basculer le mode ' + (themeService.isDarkMode() ? 'clair' : 'sombre')">
+            @if (themeService.isDarkMode()) {
+              <mat-icon>light_mode</mat-icon>
+            } @else {
+              <mat-icon>dark_mode</mat-icon>
+            }
+          </button>
+
+          <!-- Cart -->
+          <a routerLink="/cart" class="action-btn cart-btn" [attr.aria-label]="'Panier (' + cartCount() + ' article(s))'">
+            <mat-icon [matBadge]="cartCount()" matBadgeColor="warn" [matBadgeHidden]="cartCount() === 0" matBadgeSize="small" [attr.aria-hidden]="false">
+              shopping_bag
+            </mat-icon>
+          </a>
+
+          @if (authService.isAuthenticated()) {
+            <!-- Favorites -->
+            <a routerLink="/favorites" class="action-btn">
+              <mat-icon>favorite_border</mat-icon>
+            </a>
+
+            <!-- User Menu -->
+            <button class="user-btn" [matMenuTriggerFor]="userMenu">
+              <div class="user-avatar">
+                {{ getUserInitials() }}
+              </div>
+              <mat-icon class="dropdown-icon">expand_more</mat-icon>
+            </button>
+
+            <mat-menu #userMenu="matMenu" class="user-menu">
+              <div class="menu-header">
+                <div class="menu-avatar">{{ getUserInitials() }}</div>
+                <div class="menu-user-info">
+                  <span class="menu-user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
+                  <span class="menu-user-email">{{ currentUser()?.email }}</span>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              @if (authService.isAdmin()) {
+                <a mat-menu-item routerLink="/admin/dashboard" class="menu-item">
+                  <mat-icon>admin_panel_settings</mat-icon>
+                  <span>Administration</span>
+                </a>
+              }
+
+              @if (authService.isShopOwner()) {
+                <a mat-menu-item routerLink="/shop-manager/dashboard" class="menu-item">
+                  <mat-icon>store</mat-icon>
+                  <span>Gestion Boutique</span>
+                </a>
+              }
+
+              @if (!authService.isShopOwner() && !authService.isAdmin()) {
+                <a mat-menu-item routerLink="/become-vendor" class="menu-item vendor-item">
+                  <mat-icon>storefront</mat-icon>
+                  <span>Devenir vendeur</span>
+                </a>
+              }
+
+              <a mat-menu-item routerLink="/orders" class="menu-item">
+                <mat-icon>receipt_long</mat-icon>
+                <span>Mes commandes</span>
+              </a>
+
+              <a mat-menu-item routerLink="/favorites" class="menu-item">
+                <mat-icon>favorite</mat-icon>
+                <span>Mes favoris</span>
+              </a>
+
+              <a mat-menu-item routerLink="/profile" class="menu-item">
+                <mat-icon>settings</mat-icon>
+                <span>Paramètres</span>
+              </a>
+
+              <mat-divider></mat-divider>
+
+              <button mat-menu-item (click)="logout()" class="menu-item logout-item">
+                <mat-icon>logout</mat-icon>
+                <span>Déconnexion</span>
+              </button>
+            </mat-menu>
+          } @else {
+            <a routerLink="/auth/login" class="login-btn">Connexion</a>
+            <a routerLink="/auth/register" class="signup-btn">
+              <span>Inscription</span>
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          }
+        </div>
+
+        <!-- Mobile Menu Toggle (visible only on mobile) -->
+        <button class="action-btn hamburger-btn" (click)="toggleMobileMenu()" [attr.aria-label]="mobileMenuOpen() ? 'Fermer le menu' : 'Ouvrir le menu'">
+          <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+        </button>
+      </div>
+
+      <!-- Mobile Menu -->
+      @if (mobileMenuOpen()) {
+        <div class="mobile-menu">
+          <div class="mobile-search">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Rechercher..." />
+          </div>
+
+          <nav class="mobile-nav">
+            <!-- Cart Link -->
+            <a routerLink="/cart" (click)="closeMobileMenu()" class="mobile-action-item">
+              <mat-icon [matBadge]="cartCount()" matBadgeColor="warn" [matBadgeHidden]="cartCount() === 0" matBadgeSize="small">
+                shopping_bag
+              </mat-icon>
+              <span>Panier ({{ cartCount() }})</span>
+            </a>
+
+            <!-- Theme Toggle -->
+            <button (click)="themeService.toggleTheme()" class="mobile-action-item">
+              @if (themeService.isDarkMode()) {
+                <mat-icon>light_mode</mat-icon>
+                <span>Mode clair</span>
+              } @else {
+                <mat-icon>dark_mode</mat-icon>
+                <span>Mode sombre</span>
+              }
+            </button>
+
+            <mat-divider></mat-divider>
+
+            <a routerLink="/catalog" (click)="closeMobileMenu()">
+              <mat-icon>grid_view</mat-icon>
+              Catalogue
+            </a>
+            <a routerLink="/catalog" [queryParams]="{featured: true}" (click)="closeMobileMenu()">
+              <mat-icon>local_offer</mat-icon>
+              Promotions
+            </a>
+
+            @if (authService.isAuthenticated()) {
+              <mat-divider></mat-divider>
+              <a routerLink="/orders" (click)="closeMobileMenu()">
+                <mat-icon>receipt_long</mat-icon>
+                Mes commandes
+              </a>
+              <a routerLink="/profile" (click)="closeMobileMenu()">
+                <mat-icon>person</mat-icon>
+                Mon profil
+              </a>
+              <button (click)="logout(); closeMobileMenu()">
+                <mat-icon>logout</mat-icon>
+                Déconnexion
+              </button>
+            } @else {
+              <mat-divider></mat-divider>
+              <a routerLink="/auth/login" class="mobile-login" (click)="closeMobileMenu()">Connexion</a>
+              <a routerLink="/auth/register" class="mobile-signup" (click)="closeMobileMenu()">Inscription</a>
+            }
+          </nav>
+        </div>
+      }
+    </header>
+  

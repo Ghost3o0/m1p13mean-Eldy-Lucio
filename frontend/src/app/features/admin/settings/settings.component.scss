@@ -1,0 +1,117 @@
+.settings-container {
+  padding: 24px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+mat-card {
+  max-width: 700px;
+}
+
+mat-card-header {
+  margin-bottom: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-form-field {
+  margin-bottom: 16px;
+}
+
+mat-slide-toggle {
+  display: block;
+  margin: 16px 0;
+}
+
+mat-divider {
+  margin: 24px 0;
+}
+
+h3 {
+  margin: 16px 0;
+  font-size: 1.1rem;
+}
+
+.info-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 16px 0;
+}
+
+.category-commissions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.category-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.commission-field {
+  width: 120px;
+}
+
+.feature-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.feature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feature-name {
+  font-weight: 500;
+}
+
+.feature-description {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.form-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .feature-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

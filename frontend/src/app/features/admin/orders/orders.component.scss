@@ -1,0 +1,100 @@
+.orders-container {
+  padding: 24px;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+
+  button mat-icon {
+    margin-right: 4px;
+  }
+}
+
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+table {
+  width: 100%;
+}
+
+mat-chip {
+  &.status-pending {
+    background: var(--warning-light) !important;
+    color: var(--warning) !important;
+  }
+
+  &.status-confirmed {
+    background: var(--primary-50) !important;
+    color: var(--primary) !important;
+  }
+
+  &.status-delivered {
+    background: var(--success-light) !important;
+    color: var(--success) !important;
+  }
+
+  &.status-cancelled {
+    background: var(--error-light) !important;
+    color: var(--error) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .filters-row {
+    flex-direction: column;
+
+    .search-field {
+      width: 100%;
+    }
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+
+  mat-card {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders-container {
+    padding: 16px 12px;
+  }
+
+  h1 {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+  }
+}

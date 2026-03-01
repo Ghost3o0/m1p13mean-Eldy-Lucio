@@ -1,0 +1,167 @@
+﻿    <div class="tickets-page">
+      <div class="page-header">
+        <h1>{{ showNewForm() ? 'Nouveau ticket' : 'Mes tickets' }}</h1>
+        @if (!showNewForm()) {
+          <button mat-raised-button color="primary" (click)="showNewForm.set(true)">
+            <mat-icon>add</mat-icon>
+            Nouveau ticket
+          </button>
+        }
+      </div>
+
+      @if (showNewForm()) {
+        <mat-card class="new-ticket-card">
+          <mat-card-header>
+            <mat-card-title>Créer un nouveau ticket</mat-card-title>
+            <mat-card-subtitle>Décrivez votre problème et notre équipe vous répondra rapidement</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="ticketForm" (ngSubmit)="submitTicket()">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Catégorie</mat-label>
+                <mat-select formControlName="category">
+                  <mat-option value="order">Commande</mat-option>
+                  <mat-option value="product">Produit</mat-option>
+                  <mat-option value="payment">Paiement</mat-option>
+                  <mat-option value="delivery">Livraison</mat-option>
+                  <mat-option value="refund">Remboursement</mat-option>
+                  <mat-option value="other">Autre</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Sujet</mat-label>
+                <input matInput formControlName="subject" placeholder="Décrivez brièvement votre problème">
+                @if (ticketForm.get('subject')?.hasError('required') && ticketForm.get('subject')?.touched) {
+                  <mat-error>Le sujet est requis</mat-error>
+                }
+              </mat-form-field>
+
+              @if (orderId) {
+                <div class="order-reference">
+                  <mat-icon>receipt</mat-icon>
+                  <span>Commande référencée: {{ orderId }}</span>
+                </div>
+              }
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Message</mat-label>
+                <textarea matInput formControlName="message" rows="6" placeholder="Décrivez votre problème en détail..."></textarea>
+                @if (ticketForm.get('message')?.hasError('required') && ticketForm.get('message')?.touched) {
+                  <mat-error>Le message est requis</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="form-actions">
+                <button mat-button type="button" (click)="cancelNewTicket()">Annuler</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="ticketForm.invalid || isSubmitting()">
+                  @if (isSubmitting()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    Envoyer le ticket
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (!showNewForm()) {
+        @if (isLoading()) {
+          <app-loading message="Chargement des tickets..."></app-loading>
+        } @else {
+          @if (tickets().length === 0) {
+            <div class="empty-state">
+              <mat-icon>support_agent</mat-icon>
+              <h2>Aucun ticket</h2>
+              <p>Vous n'avez pas encore créé de ticket de support.</p>
+              <button mat-raised-button color="primary" (click)="showNewForm.set(true)">
+                <mat-icon>add</mat-icon>
+                Créer un ticket
+              </button>
+            </div>
+          } @else {
+            <div class="tickets-list">
+              @for (ticket of tickets(); track ticket._id) {
+                <mat-card class="ticket-card" (click)="selectTicket(ticket)">
+                  <div class="ticket-header">
+                    <div class="ticket-info">
+                      <span class="ticket-number">#{{ ticket.ticketNumber }}</span>
+                      <h3 class="ticket-subject">{{ ticket.subject }}</h3>
+                    </div>
+                    <mat-chip [class]="'status-' + ticket.status">
+                      {{ getStatusLabel(ticket.status) }}
+                    </mat-chip>
+                  </div>
+                  <div class="ticket-meta">
+                    <span class="category">
+                      <mat-icon>{{ getCategoryIcon(ticket.category) }}</mat-icon>
+                      {{ getCategoryLabel(ticket.category) }}
+                    </span>
+                    <span class="date">{{ ticket.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                  </div>
+                  @if (ticket.messages.length > 0) {
+                    <p class="ticket-preview">{{ ticket.messages[ticket.messages.length - 1].content | slice:0:100 }}...</p>
+                  }
+                </mat-card>
+              }
+            </div>
+          }
+        }
+      }
+
+      <!-- Ticket Detail Dialog -->
+      @if (selectedTicket()) {
+        <div class="ticket-detail-overlay" (click)="selectedTicket.set(null)">
+          <div class="ticket-detail-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <div>
+                <span class="ticket-number">#{{ selectedTicket()!.ticketNumber }}</span>
+                <h2>{{ selectedTicket()!.subject }}</h2>
+              </div>
+              <button mat-icon-button (click)="selectedTicket.set(null)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <div class="modal-content">
+              <div class="messages-list">
+                @for (message of selectedTicket()!.messages; track message.createdAt) {
+                  <div class="message" [class.own]="message.senderRole === 'client'">
+                    <div class="message-bubble">
+                      <p>{{ message.content }}</p>
+                      <span class="message-time">{{ message.createdAt | date:'dd/MM HH:mm' }}</span>
+                    </div>
+                    <span class="sender">{{ message.senderRole === 'client' ? 'Vous' : 'Support' }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (selectedTicket()!.status !== 'closed' && selectedTicket()!.status !== 'resolved') {
+                <form [formGroup]="replyForm" (ngSubmit)="sendReply()" class="reply-form">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Votre réponse</mat-label>
+                    <textarea matInput formControlName="reply" rows="3" placeholder="Tapez votre message..."></textarea>
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" type="submit" [disabled]="replyForm.invalid || isSendingReply()">
+                    @if (isSendingReply()) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>send</mat-icon>
+                      Envoyer
+                    }
+                  </button>
+                </form>
+              } @else {
+                <div class="ticket-closed">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Ce ticket est fermé</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  

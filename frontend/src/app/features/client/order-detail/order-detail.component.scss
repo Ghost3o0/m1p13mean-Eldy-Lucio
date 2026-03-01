@@ -1,0 +1,353 @@
+﻿    .order-detail-container {
+      padding: 24px 16px;
+    }
+
+    .order-header {
+      margin-bottom: 24px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--primary);
+      text-decoration: none;
+      margin-bottom: 16px;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .order-info {
+      h1 {
+        font-size: 1.75rem;
+        margin: 0 0 4px;
+      }
+
+      .order-date {
+        color: var(--text-secondary);
+      }
+    }
+
+    mat-chip {
+      &.status-pending {
+        background: var(--warning-light) !important;
+        color: var(--warning) !important;
+      }
+      &.status-confirmed {
+        background: var(--primary-50) !important;
+        color: var(--primary) !important;
+      }
+      &.status-preparing {
+        background: var(--secondary-light) !important;
+        color: var(--secondary) !important;
+      }
+      &.status-ready {
+        background: var(--success-light) !important;
+        color: var(--success) !important;
+      }
+      &.status-shipped {
+        background: var(--accent-light) !important;
+        color: var(--accent) !important;
+      }
+      &.status-delivered {
+        background: var(--success-light) !important;
+        color: var(--success) !important;
+      }
+      &.status-cancelled, &.status-refunded {
+        background: var(--error-light) !important;
+        color: var(--error) !important;
+      }
+      &.payment-completed {
+        background: var(--success-light) !important;
+        color: var(--success) !important;
+      }
+      &.payment-pending, &.payment-processing {
+        background: var(--warning-light) !important;
+        color: var(--warning) !important;
+      }
+      &.payment-failed, &.payment-refunded {
+        background: var(--error-light) !important;
+        color: var(--error) !important;
+      }
+    }
+
+    .success-message {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--success-light);
+      color: var(--success);
+      border-radius: 8px;
+      margin-bottom: 24px;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .progress-card {
+      margin-bottom: 24px;
+    }
+
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: #e0e0e0;
+        z-index: 0;
+      }
+
+      &:last-child::after {
+        display: none;
+      }
+
+      &.completed::after {
+        background: #4caf50;
+      }
+
+      .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e0e0e0;
+        z-index: 1;
+
+        mat-icon {
+          color: #999;
+        }
+      }
+
+      &.active .step-icon,
+      &.completed .step-icon {
+        background: #4caf50;
+
+        mat-icon {
+          color: white;
+        }
+      }
+
+      .step-label {
+        font-size: 0.85rem;
+        text-align: center;
+      }
+
+      .step-date {
+        font-size: 0.75rem;
+        color: #666;
+      }
+
+      &.active .step-label {
+        font-weight: 600;
+      }
+    }
+
+    .order-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    mat-card {
+      padding: 16px;
+    }
+
+    mat-card-header {
+      margin-bottom: 16px;
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .item-name {
+          font-weight: 500;
+        }
+
+        .item-variation {
+          font-size: 0.85rem;
+          color: #666;
+        }
+
+        .item-shop {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.85rem;
+          color: #3f51b5;
+
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+
+      .item-qty {
+        color: #666;
+      }
+
+      .item-price {
+        font-weight: 500;
+        min-width: 80px;
+        text-align: right;
+      }
+    }
+
+    .payment-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .payment-method {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .order-summary {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+
+      &.discount {
+        color: #4caf50;
+      }
+
+      &.total {
+        font-size: 1.25rem;
+        font-weight: 600;
+        padding-top: 16px;
+      }
+    }
+
+    .help-card {
+      h4 {
+        margin: 0 0 8px;
+      }
+
+      p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+      }
+    }
+
+    .not-found {
+      text-align: center;
+      padding: 80px 24px;
+
+      mat-icon {
+        font-size: 80px;
+        width: 80px;
+        height: 80px;
+        color: #ccc;
+      }
+
+      h2 {
+        margin: 16px 0 8px;
+      }
+
+      p {
+        color: #666;
+        margin-bottom: 24px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .order-content {
+        grid-template-columns: 1fr;
+      }
+
+      .order-summary {
+        position: static;
+      }
+
+      .progress-steps {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .step::after {
+        display: none;
+      }
+    }
+  

@@ -1,0 +1,51 @@
+﻿    mat-dialog-content {
+      min-width: 500px;
+    }
+
+    .coupon-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-section {
+      padding: 16px 0;
+
+      h3 {
+        margin: 0 0 16px 0;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+      }
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+
+      mat-form-field {
+        flex: 1;
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-divider {
+      margin: 8px 0;
+    }
+
+    mat-checkbox {
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      mat-dialog-content {
+        min-width: auto;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+    }
+  

@@ -1,0 +1,238 @@
+﻿    @if (isLoading()) {
+      <app-loading message="Chargement de la commande..." fullscreen></app-loading>
+    }
+
+    @if (!isLoading() && order()) {
+      <div class="order-detail-container container">
+        <!-- Header -->
+        <div class="order-header">
+          <a routerLink="/orders" class="back-link">
+            <mat-icon>arrow_back</mat-icon>
+            Retour aux commandes
+          </a>
+          <div class="header-content">
+            <div class="order-info">
+              <h1>Commande #{{ order()!.orderNumber }}</h1>
+              <span class="order-date">Passée le {{ order()!.createdAt | date:'dd MMMM yyyy à HH:mm' }}</span>
+            </div>
+            <mat-chip [class]="'status-' + order()!.status">
+              {{ getStatusLabel(order()!.status) }}
+            </mat-chip>
+          </div>
+        </div>
+
+        @if (showSuccessMessage) {
+          <div class="success-message">
+            <mat-icon>check_circle</mat-icon>
+            <span>Votre commande a été passée avec succès!</span>
+          </div>
+        }
+
+        <!-- Order Progress -->
+        @if (!isCancelled()) {
+          <mat-card class="progress-card">
+            <mat-card-content>
+              <div class="progress-steps">
+                @for (step of progressSteps; track step.status) {
+                  <div class="step" [class.active]="isStepActive(step.status)" [class.completed]="isStepCompleted(step.status)">
+                    <div class="step-icon">
+                      <mat-icon>{{ step.icon }}</mat-icon>
+                    </div>
+                    <span class="step-label">{{ step.label }}</span>
+                    @if (getStepDate(step.status)) {
+                      <span class="step-date">{{ getStepDate(step.status) | date:'dd/MM HH:mm' }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <div class="order-content">
+          <!-- Items -->
+          <div class="main-content">
+            <mat-card class="items-card">
+              <mat-card-header>
+                <mat-card-title>Articles commandés</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @for (item of order()!.items; track item._id) {
+                  <div class="order-item">
+                    <img [src]="item.image || '/assets/placeholder.png'" [alt]="item.name">
+                    <div class="item-details">
+                      <span class="item-name">{{ item.name }}</span>
+                      @if (item.variation?.optionValue) {
+                        <span class="item-variation">{{ item.variation!.variationName }}: {{ item.variation!.optionValue }}</span>
+                      }
+                      <span class="item-shop">
+                        <mat-icon>store</mat-icon>
+                        {{ getShopName(item.shopId) }}
+                      </span>
+                    </div>
+                    <div class="item-qty">x{{ item.quantity }}</div>
+                    <div class="item-price">{{ item.total | ariary }}</div>
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Delivery Info -->
+            <mat-card class="delivery-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>{{ order()!.deliveryMethod === 'delivery' ? 'local_shipping' : 'store' }}</mat-icon>
+                <mat-card-title>{{ order()!.deliveryMethod === 'delivery' ? 'Livraison' : 'Retrait en boutique' }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @if (order()!.deliveryMethod === 'delivery' && order()!.deliveryAddress) {
+                  <p>
+                    <strong>{{ order()!.deliveryAddress!.label || 'Adresse de livraison' }}</strong><br>
+                    {{ order()!.deliveryAddress!.street }}<br>
+                    {{ order()!.deliveryAddress!.zipCode }} {{ order()!.deliveryAddress!.city }}
+                    @if (order()!.deliveryAddress!.phone) {
+                      <br>Tél: {{ order()!.deliveryAddress!.phone }}
+                    }
+                    @if (order()!.deliveryAddress!.instructions) {
+                      <br><em>{{ order()!.deliveryAddress!.instructions }}</em>
+                    }
+                  </p>
+                } @else {
+                  <p>Vous pouvez récupérer votre commande en boutique une fois qu'elle sera prête.</p>
+                }
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Payment Info -->
+            <mat-card class="payment-card">
+              <mat-card-header>
+                <mat-icon mat-card-avatar>payment</mat-icon>
+                <mat-card-title>Paiement</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="payment-info">
+                  <span class="payment-method">
+                    @switch (order()!.payment.method) {
+                      @case ('card') {
+                        <mat-icon>credit_card</mat-icon>
+                        Carte bancaire
+                        @if (order()!.payment.cardLast4) {
+                          (**** {{ order()!.payment.cardLast4 }})
+                        }
+                      }
+                      @case ('paypal') {
+                        <mat-icon>account_balance_wallet</mat-icon>
+                        PayPal
+                      }
+                      @case ('cash') {
+                        <mat-icon>payments</mat-icon>
+                        Espèces
+                      }
+                    }
+                  </span>
+                  <mat-chip [class]="'payment-' + order()!.payment.status">
+                    {{ getPaymentStatusLabel(order()!.payment.status) }}
+                  </mat-chip>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Notes -->
+            @if (order()!.notes?.customer) {
+              <mat-card class="notes-card">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>note</mat-icon>
+                  <mat-card-title>Notes</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ order()!.notes!.customer }}</p>
+                </mat-card-content>
+              </mat-card>
+            }
+
+            <!-- Actions -->
+            <div class="order-actions">
+              <button mat-raised-button color="primary" (click)="downloadInvoice()">
+                <mat-icon>receipt</mat-icon>
+                Télécharger la facture
+              </button>
+              @if (canCancel()) {
+                <button mat-stroked-button color="warn" (click)="cancelOrder()">
+                  <mat-icon>cancel</mat-icon>
+                  Annuler la commande
+                </button>
+              }
+              <button mat-stroked-button (click)="contactSupport()">
+                <mat-icon>support_agent</mat-icon>
+                Contacter le support
+              </button>
+              @if (order()!.status === 'delivered' && !order()!.rating) {
+                <button mat-raised-button color="accent">
+                  <mat-icon>star</mat-icon>
+                  Laisser un avis
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Summary Sidebar -->
+          <div class="order-summary">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>Récapitulatif</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="summary-row">
+                  <span>Sous-total</span>
+                  <span>{{ order()!.subtotal | ariary }}</span>
+                </div>
+                @if (order()!.discount > 0) {
+                  <div class="summary-row discount">
+                    <span>Réduction</span>
+                    <span>-{{ order()!.discount | ariary }}</span>
+                  </div>
+                }
+                <div class="summary-row">
+                  <span>Livraison</span>
+                  <span>{{ order()!.deliveryFee | ariary }}</span>
+                </div>
+                @if (order()!.serviceFee > 0) {
+                  <div class="summary-row">
+                    <span>Frais de service</span>
+                    <span>{{ order()!.serviceFee | ariary }}</span>
+                  </div>
+                }
+                <mat-divider></mat-divider>
+                <div class="summary-row total">
+                  <span>Total</span>
+                  <span>{{ order()!.total | ariary }}</span>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Help -->
+            <mat-card class="help-card">
+              <mat-card-content>
+                <h4>Besoin d'aide ?</h4>
+                <p>Notre équipe est disponible pour répondre à vos questions.</p>
+                <a routerLink="/tickets/new" [queryParams]="{orderId: order()!._id}" mat-stroked-button>
+                  <mat-icon>help</mat-icon>
+                  Créer un ticket
+                </a>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (!isLoading() && !order()) {
+      <div class="not-found container">
+        <mat-icon>error_outline</mat-icon>
+        <h2>Commande non trouvée</h2>
+        <p>Cette commande n'existe pas ou vous n'avez pas les droits pour la consulter.</p>
+        <a routerLink="/orders" mat-raised-button color="primary">
+          Voir mes commandes
+        </a>
+      </div>
+    }
+  

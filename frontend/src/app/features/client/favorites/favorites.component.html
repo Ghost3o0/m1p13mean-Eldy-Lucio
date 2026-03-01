@@ -1,0 +1,79 @@
+﻿    <div class="favorites-container container">
+      <h1>Mes favoris</h1>
+
+      @if (isLoading()) {
+        <app-loading message="Chargement des favoris..."></app-loading>
+      }
+
+      @if (!isLoading()) {
+        @if (favorites().length === 0) {
+          <div class="empty-favorites">
+            <mat-icon>favorite_border</mat-icon>
+            <h2>Aucun favori</h2>
+            <p>Vous n'avez pas encore de produits favoris.</p>
+            <a routerLink="/catalog" mat-raised-button color="primary">
+              Explorer le catalogue
+            </a>
+          </div>
+        } @else {
+          <div class="favorites-grid">
+            @for (product of favorites(); track product._id) {
+              <mat-card class="favorite-card">
+                <button mat-icon-button class="remove-btn" (click)="removeFavorite(product._id)" [disabled]="isRemoving()">
+                  <mat-icon>close</mat-icon>
+                </button>
+                <a [routerLink]="['/product', product._id]">
+                  <img [src]="product.images[0] || '/assets/placeholder.png'" [alt]="product.name" class="product-image">
+                </a>
+                <mat-card-content>
+                  <a [routerLink]="['/product', product._id]" class="product-name">
+                    {{ product.name }}
+                  </a>
+                  @if (getShopName(product.shopId)) {
+                    <span class="product-shop">{{ getShopName(product.shopId) }}</span>
+                  }
+                  <div class="product-price-row">
+                    <span class="product-price">{{ product.basePrice | ariary }}</span>
+                    @if (product.compareAtPrice && product.compareAtPrice > product.basePrice) {
+                      <span class="product-old-price">{{ product.compareAtPrice | ariary }}</span>
+                    }
+                  </div>
+                  <div class="stock-status" [class.in-stock]="product.stock > 0" [class.out-of-stock]="product.stock <= 0">
+                    @if (product.stock > 0) {
+                      <mat-icon>check_circle</mat-icon>
+                      En stock
+                    } @else {
+                      <mat-icon>cancel</mat-icon>
+                      Rupture de stock
+                    }
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    class="add-cart-btn"
+                    [disabled]="product.stock <= 0 || isAddingToCart()"
+                    (click)="addToCart(product)">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                    Ajouter au panier
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+
+          @if (pagination() && pagination()!.totalPages > 1) {
+            <mat-paginator
+              [length]="pagination()!.total"
+              [pageSize]="pagination()!.limit"
+              [pageIndex]="pagination()!.page - 1"
+              [pageSizeOptions]="[12, 24, 48]"
+              (page)="onPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          }
+        }
+      }
+    </div>
+  

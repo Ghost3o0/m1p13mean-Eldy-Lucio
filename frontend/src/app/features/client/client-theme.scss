@@ -1,0 +1,88 @@
+// Client Module Theme - Cyan/Teal
+// Modern, friendly, trustworthy shopping experience
+
+:host {
+  // Primary Colors - Cyan
+  --module-primary: #06b6d4;
+  --module-primary-dark: #0891b2;
+  --module-primary-light: #cffafe;
+  --module-primary-50: #ecfeff;
+
+  // Gradients
+  --module-gradient: linear-gradient(135deg, #06b6d4 0%, #0369a1 100%);
+  --module-gradient-light: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+
+  // Header
+  --header-bg: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0369a1 100%);
+  --header-text: #ffffff;
+
+  // Buttons
+  --btn-primary-bg: linear-gradient(135deg, #06b6d4, #0369a1);
+  --btn-primary-hover: linear-gradient(135deg, #0891b2, #075985);
+  --btn-primary-shadow: rgba(6, 182, 212, 0.4);
+
+  // Cards
+  --card-hover-shadow: 0 8px 30px rgba(6, 182, 212, 0.15);
+  --card-accent: #06b6d4;
+
+  // Status Chips
+  --status-pending-bg: #cffafe;
+  --status-pending-text: #0369a1;
+  --status-confirmed-bg: #dbeafe;
+  --status-confirmed-text: #1e40af;
+  --status-delivered-bg: #d1fae5;
+  --status-delivered-text: #047857;
+  --status-cancelled-bg: #fee2e2;
+  --status-cancelled-text: #991b1b;
+
+  // Stat Card Icons
+  --stat-icon-1: linear-gradient(135deg, #06b6d4 0%, #0369a1 100%);
+  --stat-icon-2: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --stat-icon-3: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --stat-icon-4: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+// Override primary button styles
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  background: var(--btn-primary-bg) !important;
+
+  &:hover {
+    background: var(--btn-primary-hover) !important;
+    box-shadow: 0 4px 12px var(--btn-primary-shadow);
+  }
+}
+
+// Card hover effects
+.mat-mdc-card:hover {
+  box-shadow: var(--card-hover-shadow);
+}
+
+// Links
+a {
+  color: var(--module-primary);
+
+  &:hover {
+    color: var(--module-primary-dark);
+  }
+}
+
+// Status chips
+.status-chip, .status-badge {
+  &.pending {
+    background: var(--status-pending-bg) !important;
+    color: var(--status-pending-text) !important;
+  }
+  &.confirmed {
+    background: var(--status-confirmed-bg) !important;
+    color: var(--status-confirmed-text) !important;
+  }
+  &.delivered {
+    background: var(--status-delivered-bg) !important;
+    color: var(--status-delivered-text) !important;
+  }
+  &.cancelled {
+    background: var(--status-cancelled-bg) !important;
+    color: var(--status-cancelled-text) !important;
+  }
+}

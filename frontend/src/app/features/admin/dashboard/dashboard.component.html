@@ -1,0 +1,182 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Tableau de bord Admin</h1>
+    <span class="subtitle">Vue d'ensemble de la plateforme</span>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading message="Chargement des statistiques..."></app-loading>
+  }
+
+  @if (!isLoading()) {
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <mat-card class="stat-card" routerLink="/admin/users">
+        <mat-card-content>
+          <div class="stat-icon users">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.totalUsers }}</span>
+            <span class="stat-label">Utilisateurs</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card" routerLink="/admin/shops">
+        <mat-card-content>
+          <div class="stat-icon shops">
+            <mat-icon>store</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.totalShops }}</span>
+            <span class="stat-label">Boutiques</span>
+            @if (stats()?.pendingShops && stats()!.pendingShops > 0) {
+              <span class="stat-badge">{{ stats()!.pendingShops }} en attente</span>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-icon products">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.totalProducts }}</span>
+            <span class="stat-label">Produits</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card" routerLink="/admin/orders">
+        <mat-card-content>
+          <div class="stat-icon orders">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.totalOrders }}</span>
+            <span class="stat-label">Commandes</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card revenue">
+        <mat-card-content>
+          <div class="stat-icon revenue-icon">
+            <mat-icon>euro</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.totalRevenue | ariary:'symbol':'1.0-0' }}</span>
+            <span class="stat-label">Revenu total</span>
+            <span class="stat-detail">{{ stats()?.todayRevenue | ariary }} aujourd'hui</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card" routerLink="/admin/tickets">
+        <mat-card-content>
+          <div class="stat-icon tickets">
+            <mat-icon>support_agent</mat-icon>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ stats()?.openTickets }}</span>
+            <span class="stat-label">Tickets ouverts</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Revenus des 30 derniers jours</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <canvas baseChart [data]="revenueChartData" [options]="revenueChartOptions" type="line"></canvas>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Répartition par catégorie</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <canvas baseChart [data]="categoryChartData" [options]="categoryChartOptions" type="doughnut"></canvas>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-row">
+      <mat-card class="activity-card">
+        <mat-card-header>
+          <mat-card-title>Boutiques en attente</mat-card-title>
+          <a routerLink="/admin/shops" mat-button color="primary">Voir tout</a>
+        </mat-card-header>
+        <mat-card-content>
+          @if (pendingShops().length > 0) {
+            <table mat-table [dataSource]="pendingShops()">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Boutique</th>
+                <td mat-cell *matCellDef="let shop">{{ shop.name }}</td>
+              </ng-container>
+              <ng-container matColumnDef="owner">
+                <th mat-header-cell *matHeaderCellDef>Propriétaire</th>
+                <td mat-cell *matCellDef="let shop">{{ shop.ownerName }}</td>
+              </ng-container>
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let shop">{{ shop.createdAt | date:'dd/MM/yyyy' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let shop">
+                  <a [routerLink]="['/admin/shops', shop._id]" mat-button color="primary">Examiner</a>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['name', 'owner', 'date', 'actions']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['name', 'owner', 'date', 'actions'];"></tr>
+            </table>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>check_circle</mat-icon>
+              <p>Aucune boutique en attente</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="activity-card">
+        <mat-card-header>
+          <mat-card-title>Tickets récents</mat-card-title>
+          <a routerLink="/admin/tickets" mat-button color="primary">Voir tout</a>
+        </mat-card-header>
+        <mat-card-content>
+          @if (recentTickets().length > 0) {
+            <div class="tickets-list">
+              @for (ticket of recentTickets(); track ticket._id) {
+                <div class="ticket-item" [routerLink]="['/admin/tickets', ticket._id]">
+                  <div class="ticket-info">
+                    <span class="ticket-subject">{{ ticket.subject }}</span>
+                    <span class="ticket-user">{{ ticket.userName }}</span>
+                  </div>
+                  <mat-chip [class]="'priority-' + ticket.priority">
+                    {{ ticket.priority }}
+                  </mat-chip>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>check_circle</mat-icon>
+              <p>Aucun ticket ouvert</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

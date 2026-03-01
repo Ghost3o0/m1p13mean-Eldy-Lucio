@@ -1,0 +1,392 @@
+﻿    .dashboard-container {
+      padding: 24px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+
+      .header-left {
+        h1 {
+          font-size: 2rem;
+          margin: 0 0 4px;
+        }
+
+        .welcome-text {
+          color: var(--text-secondary);
+        }
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .period-select {
+          width: 180px;
+
+          ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      mat-card-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+      }
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        color: white;
+      }
+
+      &.revenue {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      &.orders {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      &.products {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      &.average {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      }
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .stat-detail {
+        font-size: 0.8rem;
+        color: var(--success);
+
+        &.warning {
+          color: var(--warning);
+        }
+      }
+    }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      padding: 16px;
+
+      mat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      &.main-chart {
+        .chart-legend {
+          display: flex;
+          gap: 16px;
+
+          .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+
+            .dot {
+              width: 10px;
+              height: 10px;
+              border-radius: 50%;
+
+              &.revenue { background: #3f51b5; }
+              &.orders { background: #ff9800; }
+            }
+          }
+        }
+      }
+
+      canvas {
+        max-height: 300px;
+      }
+    }
+
+    .products-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .top-products-card {
+      mat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .top-products-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .product-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        background: var(--bg-secondary);
+        border-radius: 12px;
+
+        .rank {
+          width: 32px;
+          height: 32px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 0.9rem;
+        }
+
+        .product-info {
+          flex: 1;
+
+          .product-name {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+          }
+
+          .product-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+
+            .revenue {
+              color: var(--success);
+              font-weight: 600;
+            }
+          }
+
+          mat-progress-bar {
+            height: 4px;
+            border-radius: 2px;
+          }
+        }
+
+        .stock-badge {
+          padding: 4px 12px;
+          background: var(--success-light);
+          color: var(--success);
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 600;
+
+          &.low {
+            background: var(--warning-light);
+            color: var(--warning);
+          }
+        }
+      }
+
+      .empty-products {
+        text-align: center;
+        padding: 48px;
+        color: var(--text-secondary);
+
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          color: var(--gray-300);
+        }
+      }
+    }
+
+    .performance-card {
+      .performance-metrics {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .metric {
+        .metric-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+
+        .metric-label {
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+        }
+
+        .metric-value {
+          font-size: 1.25rem;
+          font-weight: 700;
+
+          &.positive { color: var(--success); }
+          &.negative { color: var(--error); }
+          &.warning { color: var(--warning); }
+        }
+
+        mat-progress-bar {
+          height: 6px;
+          border-radius: 3px;
+        }
+      }
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+
+    .recent-orders-card {
+      mat-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .orders-table {
+        width: 100%;
+
+        tr.mat-mdc-row {
+          cursor: pointer;
+
+          &:hover {
+            background: var(--bg-secondary);
+          }
+        }
+      }
+
+      mat-chip {
+        &.status-pending {
+          background: var(--warning-light) !important;
+          color: var(--warning) !important;
+        }
+
+        &.status-confirmed {
+          background: var(--primary-50) !important;
+          color: var(--primary) !important;
+        }
+
+        &.status-preparing {
+          background: var(--error-light) !important;
+          color: var(--error) !important;
+        }
+
+        &.status-ready, &.status-delivered {
+          background: var(--success-light) !important;
+          color: var(--success) !important;
+        }
+
+        &.status-cancelled {
+          background: var(--error-light) !important;
+          color: var(--error) !important;
+        }
+      }
+    }
+
+    .empty-orders {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-secondary);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        color: var(--gray-300);
+      }
+    }
+
+    .quick-actions-card {
+      mat-card-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .action-btn {
+        justify-content: flex-start;
+        padding: 16px;
+      }
+
+      .pos-btn {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: #1a1a1a;
+        font-weight: 600;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .charts-row,
+      .bottom-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  

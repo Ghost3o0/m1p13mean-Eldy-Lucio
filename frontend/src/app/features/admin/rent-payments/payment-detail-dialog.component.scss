@@ -1,0 +1,95 @@
+﻿    mat-dialog-content {
+      min-width: 450px;
+    }
+
+    .payment-details {
+      padding: 8px 0;
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .payment-number {
+        font-family: monospace;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+    }
+
+    .detail-section {
+      padding: 16px 0;
+
+      h3 {
+        margin: 0 0 12px 0;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+      }
+    }
+
+    .detail-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+
+      mat-icon {
+        color: var(--text-secondary);
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      &.amount-row .amount {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--success);
+      }
+
+      &.rejection {
+        color: var(--error);
+
+        mat-icon {
+          color: var(--error);
+        }
+      }
+    }
+
+    .proofs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    mat-chip {
+      &.status-pending {
+        background: var(--warning-light) !important;
+        color: var(--warning) !important;
+      }
+      &.status-validated {
+        background: var(--success-light) !important;
+        color: var(--success) !important;
+      }
+      &.status-rejected {
+        background: var(--error-light) !important;
+        color: var(--error) !important;
+      }
+      &.status-late {
+        background: var(--error-light) !important;
+        color: var(--error) !important;
+      }
+    }
+
+    mat-divider {
+      margin: 8px 0;
+    }
+
+    @media (max-width: 600px) {
+      mat-dialog-content {
+        min-width: auto;
+      }
+    }
+  

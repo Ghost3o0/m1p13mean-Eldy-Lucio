@@ -1,0 +1,159 @@
+﻿    .coupons-container {
+      padding: 24px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        margin: 4px 0 0 0;
+      }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+
+      mat-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        color: var(--primary);
+      }
+
+      &.active mat-icon {
+        color: var(--success);
+      }
+
+      &.usage mat-icon {
+        color: var(--warning);
+      }
+
+      .stat-info {
+        display: flex;
+        flex-direction: column;
+
+        .stat-value {
+          font-size: 1.5rem;
+          font-weight: 700;
+        }
+
+        .stat-label {
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .table-card {
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+    }
+
+    .coupon-code {
+      font-family: monospace;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 4px 8px;
+      background: var(--primary-50);
+      border-radius: 4px;
+    }
+
+    .coupon-value {
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    mat-chip {
+      &.type-percentage {
+        background: var(--primary-50) !important;
+        color: var(--primary) !important;
+      }
+      &.type-fixed_amount {
+        background: var(--success-light) !important;
+        color: var(--success) !important;
+      }
+      &.type-free_shipping {
+        background: var(--warning-light) !important;
+        color: var(--warning) !important;
+      }
+    }
+
+    .validity {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.85rem;
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        color: var(--text-secondary);
+      }
+    }
+
+    tr.expired {
+      opacity: 0.5;
+    }
+
+    tr.inactive {
+      background: var(--bg-secondary);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: var(--gray-300);
+      }
+
+      h3 {
+        margin: 16px 0 8px;
+      }
+
+      p {
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+    }
+
+    .delete-item {
+      color: var(--error);
+    }
+
+    mat-paginator {
+      border-top: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        gap: 16px;
+      }
+    }
+  

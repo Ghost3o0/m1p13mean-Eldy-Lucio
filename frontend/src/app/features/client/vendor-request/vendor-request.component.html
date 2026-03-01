@@ -1,0 +1,428 @@
+﻿    <div class="vendor-request-page">
+      @if (isLoading()) {
+        <app-loading message="Chargement..."></app-loading>
+      } @else if (existingRequest()) {
+        <!-- Existing Request View -->
+        <div class="request-status-view">
+          <div class="page-header">
+            <h1>Ma demande vendeur</h1>
+            <div class="status-badge" [class]="'status-' + existingRequest()!.status">
+              {{ getStatusLabel(existingRequest()!.status) }}
+            </div>
+          </div>
+
+          <!-- Status Timeline -->
+          <mat-card class="timeline-card">
+            <div class="timeline">
+              <div class="timeline-item" [class.active]="isStatusReached('pending')" [class.current]="existingRequest()!.status === 'pending'">
+                <div class="timeline-dot"><mat-icon>hourglass_empty</mat-icon></div>
+                <span>En attente</span>
+              </div>
+              <div class="timeline-line" [class.active]="isStatusReached('under_review')"></div>
+              <div class="timeline-item" [class.active]="isStatusReached('under_review')" [class.current]="existingRequest()!.status === 'under_review'">
+                <div class="timeline-dot"><mat-icon>search</mat-icon></div>
+                <span>En cours d'examen</span>
+              </div>
+              <div class="timeline-line" [class.active]="isStatusReached('approved')"></div>
+              <div class="timeline-item" [class.active]="existingRequest()!.status === 'approved'" [class.rejected]="existingRequest()!.status === 'rejected'">
+                <div class="timeline-dot">
+                  <mat-icon>{{ existingRequest()!.status === 'rejected' ? 'close' : 'check' }}</mat-icon>
+                </div>
+                <span>{{ existingRequest()!.status === 'rejected' ? 'Rejetee' : 'Approuvee' }}</span>
+              </div>
+            </div>
+          </mat-card>
+
+          @if (existingRequest()!.status === 'documents_requested') {
+            <mat-card class="alert-card warning">
+              <mat-icon>warning</mat-icon>
+              <div>
+                <strong>Documents supplementaires requis</strong>
+                <p>L'administrateur a besoin de documents supplementaires. Consultez les messages ci-dessous.</p>
+              </div>
+            </mat-card>
+          }
+
+          @if (existingRequest()!.status === 'approved') {
+            <mat-card class="alert-card success">
+              <mat-icon>celebration</mat-icon>
+              <div>
+                <strong>Felicitations ! Votre demande a ete approuvee</strong>
+                <p>Vous pouvez maintenant acceder a votre espace vendeur et commencer a vendre.</p>
+                <button mat-raised-button color="primary" routerLink="/shop/dashboard">
+                  Acceder a ma boutique
+                </button>
+              </div>
+            </mat-card>
+          }
+
+          @if (existingRequest()!.status === 'rejected') {
+            <mat-card class="alert-card error">
+              <mat-icon>error</mat-icon>
+              <div>
+                <strong>Votre demande a ete rejetee</strong>
+                @if (existingRequest()!.resolution?.note) {
+                  <p>{{ existingRequest()!.resolution!.note }}</p>
+                }
+              </div>
+            </mat-card>
+          }
+
+          <!-- Request Details -->
+          <mat-card class="details-card">
+            <mat-card-header>
+              <mat-card-title>Details de la demande</mat-card-title>
+              <mat-card-subtitle>#{{ existingRequest()!.requestNumber }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="details-grid">
+                <div class="detail-section">
+                  <h4>Boutique</h4>
+                  <p><strong>{{ existingRequest()!.shopInfo.name }}</strong></p>
+                  @if (existingRequest()!.shopInfo.description) {
+                    <p class="description">{{ existingRequest()!.shopInfo.description }}</p>
+                  }
+                </div>
+                <div class="detail-section">
+                  <h4>Contact professionnel</h4>
+                  <p><mat-icon>phone</mat-icon> {{ existingRequest()!.professionalContact.phone }}</p>
+                  @if (existingRequest()!.professionalContact.email) {
+                    <p><mat-icon>email</mat-icon> {{ existingRequest()!.professionalContact.email }}</p>
+                  }
+                </div>
+                <div class="detail-section">
+                  <h4>Informations entreprise</h4>
+                  <p><strong>{{ getRegistrationTypeLabel(existingRequest()!.businessInfo.registrationType) }}:</strong> {{ existingRequest()!.businessInfo.registrationNumber }}</p>
+                </div>
+                <div class="detail-section">
+                  <h4>Adresse commerciale</h4>
+                  <p>{{ existingRequest()!.commercialAddress.street }}</p>
+                  <p>{{ existingRequest()!.commercialAddress.zipCode }} {{ existingRequest()!.commercialAddress.city }}</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Messages -->
+          <mat-card class="messages-card">
+            <mat-card-header>
+              <mat-card-title>Echanges avec l'administrateur</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (existingRequest()!.messages.length === 0) {
+                <div class="no-messages">
+                  <mat-icon>chat_bubble_outline</mat-icon>
+                  <p>Aucun message pour le moment</p>
+                </div>
+              } @else {
+                <div class="messages-list">
+                  @for (message of existingRequest()!.messages; track message._id) {
+                    <div class="message" [class.own]="message.senderRole === 'client'">
+                      <div class="message-bubble">
+                        <p>{{ message.content }}</p>
+                        <span class="message-time">{{ message.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                      </div>
+                      <span class="sender">{{ message.senderRole === 'client' ? 'Vous' : 'Admin' }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (existingRequest()!.status !== 'approved' && existingRequest()!.status !== 'rejected') {
+                <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Votre message</mat-label>
+                    <textarea matInput formControlName="content" rows="3" placeholder="Tapez votre message..."></textarea>
+                  </mat-form-field>
+                  <button mat-raised-button color="primary" type="submit" [disabled]="messageForm.invalid || isSendingMessage()">
+                    @if (isSendingMessage()) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>send</mat-icon>
+                      Envoyer
+                    }
+                  </button>
+                </form>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          @if (existingRequest()!.status === 'pending') {
+            <div class="cancel-action">
+              <button mat-stroked-button color="warn" (click)="cancelRequest()">
+                <mat-icon>cancel</mat-icon>
+                Annuler ma demande
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- New Request Form -->
+        <div class="new-request-view">
+          <div class="page-header">
+            <h1>Devenir vendeur</h1>
+            <p>Remplissez le formulaire ci-dessous pour soumettre votre demande</p>
+          </div>
+
+          <mat-card class="form-card">
+            <mat-stepper linear #stepper>
+              <!-- Step 1: Shop Info -->
+              <mat-step [stepControl]="shopInfoForm">
+                <ng-template matStepLabel>Informations boutique</ng-template>
+                <form [formGroup]="shopInfoForm">
+                  <div class="step-content">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Nom de la boutique</mat-label>
+                      <input matInput formControlName="name" placeholder="Ma Super Boutique">
+                      <mat-icon matSuffix>storefront</mat-icon>
+                      @if (shopInfoForm.get('name')?.hasError('required') && shopInfoForm.get('name')?.touched) {
+                        <mat-error>Le nom est requis</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Description</mat-label>
+                      <textarea matInput formControlName="description" rows="4" placeholder="Decrivez votre boutique..."></textarea>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Categorie</mat-label>
+                      <mat-select formControlName="category">
+                        @for (cat of categories(); track cat._id) {
+                          <mat-option [value]="cat._id">{{ cat.name }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="step-actions">
+                    <button mat-raised-button color="primary" matStepperNext [disabled]="shopInfoForm.invalid">
+                      Suivant
+                      <mat-icon>arrow_forward</mat-icon>
+                    </button>
+                  </div>
+                </form>
+              </mat-step>
+
+              <!-- Step 2: Contact -->
+              <mat-step [stepControl]="contactForm">
+                <ng-template matStepLabel>Contact professionnel</ng-template>
+                <form [formGroup]="contactForm">
+                  <div class="step-content">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Telephone professionnel</mat-label>
+                      <input matInput formControlName="phone" placeholder="06 12 34 56 78">
+                      <mat-icon matSuffix>phone</mat-icon>
+                      @if (contactForm.get('phone')?.hasError('required') && contactForm.get('phone')?.touched) {
+                        <mat-error>Le telephone est requis</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Email professionnel (optionnel)</mat-label>
+                      <input matInput formControlName="email" type="email" placeholder="pro@example.com">
+                      <mat-icon matSuffix>email</mat-icon>
+                      @if (contactForm.get('email')?.hasError('email') && contactForm.get('email')?.touched) {
+                        <mat-error>Email invalide</mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                  <div class="step-actions">
+                    <button mat-button matStepperPrevious>
+                      <mat-icon>arrow_back</mat-icon>
+                      Precedent
+                    </button>
+                    <button mat-raised-button color="primary" matStepperNext [disabled]="contactForm.invalid">
+                      Suivant
+                      <mat-icon>arrow_forward</mat-icon>
+                    </button>
+                  </div>
+                </form>
+              </mat-step>
+
+              <!-- Step 3: Business Info -->
+              <mat-step [stepControl]="businessForm">
+                <ng-template matStepLabel>Informations entreprise</ng-template>
+                <form [formGroup]="businessForm">
+                  <div class="step-content">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Type d'immatriculation</mat-label>
+                      <mat-select formControlName="registrationType">
+                        <mat-option value="siret">SIRET</mat-option>
+                        <mat-option value="rc">Registre du Commerce (RC)</mat-option>
+                        <mat-option value="other">Autre</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Numero d'immatriculation</mat-label>
+                      <input matInput formControlName="registrationNumber" placeholder="123 456 789 00012">
+                      <mat-icon matSuffix>badge</mat-icon>
+                      @if (businessForm.get('registrationNumber')?.hasError('required') && businessForm.get('registrationNumber')?.touched) {
+                        <mat-error>Le numero est requis</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <h4>Adresse commerciale</h4>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Adresse</mat-label>
+                      <input matInput formControlName="street" placeholder="123 Rue du Commerce">
+                      @if (businessForm.get('street')?.hasError('required') && businessForm.get('street')?.touched) {
+                        <mat-error>L'adresse est requise</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <div class="form-row">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Code postal</mat-label>
+                        <input matInput formControlName="zipCode" placeholder="75001">
+                        @if (businessForm.get('zipCode')?.hasError('required') && businessForm.get('zipCode')?.touched) {
+                          <mat-error>Requis</mat-error>
+                        }
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline">
+                        <mat-label>Ville</mat-label>
+                        <input matInput formControlName="city" placeholder="Paris">
+                        @if (businessForm.get('city')?.hasError('required') && businessForm.get('city')?.touched) {
+                          <mat-error>Requise</mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div class="step-actions">
+                    <button mat-button matStepperPrevious>
+                      <mat-icon>arrow_back</mat-icon>
+                      Precedent
+                    </button>
+                    <button mat-raised-button color="primary" matStepperNext [disabled]="businessForm.invalid">
+                      Suivant
+                      <mat-icon>arrow_forward</mat-icon>
+                    </button>
+                  </div>
+                </form>
+              </mat-step>
+
+              <!-- Step 4: Documents -->
+              <mat-step [stepControl]="documentsForm">
+                <ng-template matStepLabel>Documents</ng-template>
+                <form [formGroup]="documentsForm">
+                  <div class="step-content">
+                    <p class="step-description">
+                      Veuillez telecharger les documents requis pour verifier votre identite et votre entreprise.
+                    </p>
+
+                    <div class="upload-section">
+                      <label class="upload-label">Piece d'identite *</label>
+                      <div class="upload-box" [class.has-file]="idDocumentFile()" (click)="idDocumentInput.click()">
+                        <input #idDocumentInput type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onIdDocumentSelected($event)" hidden>
+                        @if (idDocumentFile()) {
+                          <mat-icon>check_circle</mat-icon>
+                          <span>{{ idDocumentFile()!.name }}</span>
+                          <button mat-icon-button (click)="removeIdDocument(); $event.stopPropagation()">
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        } @else {
+                          <mat-icon>upload_file</mat-icon>
+                          <span>Cliquez pour telecharger</span>
+                          <small>PDF, JPG ou PNG (max 5MB)</small>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="upload-section">
+                      <label class="upload-label">Document d'entreprise (optionnel)</label>
+                      <div class="upload-box" [class.has-file]="businessDocumentFile()" (click)="businessDocumentInput.click()">
+                        <input #businessDocumentInput type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onBusinessDocumentSelected($event)" hidden>
+                        @if (businessDocumentFile()) {
+                          <mat-icon>check_circle</mat-icon>
+                          <span>{{ businessDocumentFile()!.name }}</span>
+                          <button mat-icon-button (click)="removeBusinessDocument(); $event.stopPropagation()">
+                            <mat-icon>close</mat-icon>
+                          </button>
+                        } @else {
+                          <mat-icon>upload_file</mat-icon>
+                          <span>Kbis, extrait RC, etc.</span>
+                          <small>PDF, JPG ou PNG (max 5MB)</small>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  <div class="step-actions">
+                    <button mat-button matStepperPrevious>
+                      <mat-icon>arrow_back</mat-icon>
+                      Precedent
+                    </button>
+                    <button mat-raised-button color="primary" matStepperNext [disabled]="!idDocumentFile()">
+                      Suivant
+                      <mat-icon>arrow_forward</mat-icon>
+                    </button>
+                  </div>
+                </form>
+              </mat-step>
+
+              <!-- Step 5: Review -->
+              <mat-step>
+                <ng-template matStepLabel>Verification</ng-template>
+                <div class="step-content">
+                  <h3>Recapitulatif de votre demande</h3>
+
+                  <div class="review-sections">
+                    <div class="review-section">
+                      <h4><mat-icon>storefront</mat-icon> Boutique</h4>
+                      <p><strong>{{ shopInfoForm.get('name')?.value }}</strong></p>
+                      <p>{{ shopInfoForm.get('description')?.value || 'Pas de description' }}</p>
+                    </div>
+
+                    <div class="review-section">
+                      <h4><mat-icon>phone</mat-icon> Contact</h4>
+                      <p>{{ contactForm.get('phone')?.value }}</p>
+                      <p>{{ contactForm.get('email')?.value || 'Pas d\'email' }}</p>
+                    </div>
+
+                    <div class="review-section">
+                      <h4><mat-icon>business</mat-icon> Entreprise</h4>
+                      <p>{{ getRegistrationTypeLabel(businessForm.get('registrationType')?.value) }}: {{ businessForm.get('registrationNumber')?.value }}</p>
+                      <p>{{ businessForm.get('street')?.value }}</p>
+                      <p>{{ businessForm.get('zipCode')?.value }} {{ businessForm.get('city')?.value }}</p>
+                    </div>
+
+                    <div class="review-section">
+                      <h4><mat-icon>description</mat-icon> Documents</h4>
+                      <p>Piece d'identite: {{ idDocumentFile()?.name }}</p>
+                      @if (businessDocumentFile()) {
+                        <p>Document entreprise: {{ businessDocumentFile()?.name }}</p>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="terms-check">
+                    <label class="checkbox-label">
+                      <input type="checkbox" [(ngModel)]="acceptTerms" [ngModelOptions]="{standalone: true}">
+                      <span class="checkmark"></span>
+                      <span>J'accepte les conditions generales et certifie que les informations fournies sont exactes</span>
+                    </label>
+                  </div>
+                </div>
+                <div class="step-actions">
+                  <button mat-button matStepperPrevious>
+                    <mat-icon>arrow_back</mat-icon>
+                    Precedent
+                  </button>
+                  <button mat-raised-button color="primary" [disabled]="!acceptTerms || isSubmitting()" (click)="submitRequest()">
+                    @if (isSubmitting()) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                      <span>Envoi en cours...</span>
+                    } @else {
+                      <mat-icon>send</mat-icon>
+                      Soumettre ma demande
+                    }
+                  </button>
+                </div>
+              </mat-step>
+            </mat-stepper>
+          </mat-card>
+        </div>
+      }
+    </div>
+  

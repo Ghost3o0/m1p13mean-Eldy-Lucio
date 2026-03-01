@@ -1,0 +1,331 @@
+<div class="vendor-requests-container">
+  <div class="page-header">
+    <h1>Demandes vendeur</h1>
+    <div class="header-stats">
+      <div class="stat pending">
+        <span class="stat-value">{{ stats()?.pending || 0 }}</span>
+        <span class="stat-label">En attente</span>
+      </div>
+      <div class="stat review">
+        <span class="stat-value">{{ stats()?.underReview || 0 }}</span>
+        <span class="stat-label">En examen</span>
+      </div>
+      <div class="stat docs">
+        <span class="stat-value">{{ stats()?.documentsRequested || 0 }}</span>
+        <span class="stat-label">Docs requis</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
+    <mat-tab label="Toutes"></mat-tab>
+    <mat-tab label="En attente"></mat-tab>
+    <mat-tab label="En examen"></mat-tab>
+    <mat-tab label="Docs requis"></mat-tab>
+    <mat-tab label="Traitees"></mat-tab>
+  </mat-tab-group>
+
+  <!-- Search -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Rechercher</mat-label>
+          <input matInput [(ngModel)]="searchQuery" (keyup.enter)="loadRequests()" placeholder="Nom, email, SIRET...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <button mat-icon-button (click)="searchQuery = ''; loadRequests()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (isLoading()) {
+    <app-loading message="Chargement des demandes..."></app-loading>
+  } @else {
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="requests()">
+        <!-- Request Number -->
+        <ng-container matColumnDef="number">
+          <th mat-header-cell *matHeaderCellDef>N Demande</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="request-number">{{ request.requestNumber }}</span>
+          </td>
+        </ng-container>
+
+        <!-- User -->
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>Demandeur</th>
+          <td mat-cell *matCellDef="let request">
+            <div class="user-cell">
+              <span class="name">{{ request.userId.firstName }} {{ request.userId.lastName }}</span>
+              <span class="email">{{ request.userId.email }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Shop Name -->
+        <ng-container matColumnDef="shop">
+          <th mat-header-cell *matHeaderCellDef>Boutique</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="shop-name">{{ request.shopInfo.name }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Business Number -->
+        <ng-container matColumnDef="business">
+          <th mat-header-cell *matHeaderCellDef>Immatriculation</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="business-number">{{ request.businessInfo.registrationNumber }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let request">
+            <mat-chip [class]="'status-' + request.status">
+              {{ getStatusLabel(request.status) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Date -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let request">
+            {{ request.createdAt | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let request">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="openDetail(request)">
+                <mat-icon>visibility</mat-icon>
+                <span>Voir les details</span>
+              </button>
+              <mat-divider></mat-divider>
+              @if (request.status === 'pending' || request.status === 'under_review') {
+                <button mat-menu-item (click)="quickAction(request, 'approved')">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Approuver</span>
+                </button>
+                <button mat-menu-item (click)="openRequestDocs(request)">
+                  <mat-icon>description</mat-icon>
+                  <span>Demander des documents</span>
+                </button>
+                <button mat-menu-item (click)="quickAction(request, 'rejected')">
+                  <mat-icon>cancel</mat-icon>
+                  <span>Rejeter</span>
+                </button>
+              }
+              @if (request.status === 'documents_requested') {
+                <button mat-menu-item (click)="quickAction(request, 'approved')">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Approuver</span>
+                </button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="request-row" (click)="openDetail(row)"></tr>
+      </table>
+
+      @if (requests().length === 0) {
+        <div class="empty-state">
+          <mat-icon>assignment</mat-icon>
+          <h3>Aucune demande</h3>
+          <p>Aucune demande vendeur ne correspond a vos criteres.</p>
+        </div>
+      }
+
+      <mat-paginator
+        [length]="pagination()?.total || 0"
+        [pageSize]="pagination()?.limit || 20"
+        [pageIndex]="(pagination()?.page || 1) - 1"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card>
+  }
+
+  <!-- Detail Modal -->
+  @if (selectedRequest()) {
+    <div class="modal-overlay" (click)="closeDetail()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <span class="request-number">#{{ selectedRequest()!.requestNumber }}</span>
+            <h2>{{ selectedRequest()!.shopInfo.name }}</h2>
+          </div>
+          <div class="header-actions">
+            <mat-chip [class]="'status-' + selectedRequest()!.status">
+              {{ getStatusLabel(selectedRequest()!.status) }}
+            </mat-chip>
+            <button mat-icon-button (click)="closeDetail()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <div class="details-grid">
+            <div class="detail-section">
+              <h4>Demandeur</h4>
+              <p><strong>{{ selectedRequest()!.userId.firstName }} {{ selectedRequest()!.userId.lastName }}</strong></p>
+              <p><mat-icon>email</mat-icon> {{ selectedRequest()!.userId.email }}</p>
+              @if (selectedRequest()!.userId.phone) {
+                <p><mat-icon>phone</mat-icon> {{ selectedRequest()!.userId.phone }}</p>
+              }
+            </div>
+
+            <div class="detail-section">
+              <h4>Contact pro</h4>
+              <p><mat-icon>phone</mat-icon> {{ selectedRequest()!.professionalContact.phone }}</p>
+              @if (selectedRequest()!.professionalContact.email) {
+                <p><mat-icon>email</mat-icon> {{ selectedRequest()!.professionalContact.email }}</p>
+              }
+            </div>
+
+            <div class="detail-section">
+              <h4>Entreprise</h4>
+              <p><strong>{{ getRegistrationTypeLabel(selectedRequest()!.businessInfo.registrationType) }}:</strong></p>
+              <p>{{ selectedRequest()!.businessInfo.registrationNumber }}</p>
+            </div>
+
+            <div class="detail-section">
+              <h4>Adresse</h4>
+              <p>{{ selectedRequest()!.commercialAddress.street }}</p>
+              <p>{{ selectedRequest()!.commercialAddress.zipCode }} {{ selectedRequest()!.commercialAddress.city }}</p>
+            </div>
+          </div>
+
+          @if (selectedRequest()!.shopInfo.description) {
+            <div class="description-section">
+              <h4>Description de la boutique</h4>
+              <p>{{ selectedRequest()!.shopInfo.description }}</p>
+            </div>
+          }
+
+          <!-- Documents -->
+          <div class="documents-section">
+            <h4>Documents</h4>
+            <div class="documents-list">
+              @if (selectedRequest()!.documents.idDocument) {
+                <a class="document-item" [href]="selectedRequest()!.documents.idDocument!.path" target="_blank">
+                  <mat-icon>description</mat-icon>
+                  <span>Piece d'identite</span>
+                  <mat-icon>open_in_new</mat-icon>
+                </a>
+              }
+              @if (selectedRequest()!.documents.businessDocument) {
+                <a class="document-item" [href]="selectedRequest()!.documents.businessDocument!.path" target="_blank">
+                  <mat-icon>description</mat-icon>
+                  <span>Document entreprise</span>
+                  <mat-icon>open_in_new</mat-icon>
+                </a>
+              }
+              @for (doc of selectedRequest()!.documents.additionalDocuments; track doc.filename) {
+                <a class="document-item" [href]="doc.path" target="_blank">
+                  <mat-icon>description</mat-icon>
+                  <span>{{ doc.label || 'Document supplementaire' }}</span>
+                  <mat-icon>open_in_new</mat-icon>
+                </a>
+              }
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="messages-section">
+            <h4>Echanges</h4>
+            @if (selectedRequest()!.messages.length === 0) {
+              <p class="no-messages">Aucun message</p>
+            } @else {
+              <div class="messages-list">
+                @for (message of selectedRequest()!.messages; track message._id) {
+                  <div class="message" [class.admin]="message.senderRole === 'admin'">
+                    <div class="message-bubble">
+                      <p>{{ message.content }}</p>
+                      <span class="time">{{ message.createdAt | date:'dd/MM HH:mm' }}</span>
+                    </div>
+                    <span class="sender">{{ message.senderRole === 'admin' ? 'Admin' : 'Client' }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (selectedRequest()!.status !== 'approved' && selectedRequest()!.status !== 'rejected') {
+              <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Votre message</mat-label>
+                  <textarea matInput formControlName="content" rows="2"></textarea>
+                </mat-form-field>
+                <button mat-raised-button color="primary" type="submit" [disabled]="messageForm.invalid || isSendingMessage()">
+                  @if (isSendingMessage()) {
+                    <mat-spinner diameter="20"></mat-spinner>
+                  } @else {
+                    <mat-icon>send</mat-icon>
+                  }
+                </button>
+              </form>
+            }
+          </div>
+        </div>
+
+        @if (selectedRequest()!.status !== 'approved' && selectedRequest()!.status !== 'rejected') {
+          <div class="modal-footer">
+            <button mat-stroked-button color="warn" (click)="updateStatus('rejected')">
+              <mat-icon>cancel</mat-icon>
+              Rejeter
+            </button>
+            <button mat-stroked-button (click)="openRequestDocs(selectedRequest()!)">
+              <mat-icon>description</mat-icon>
+              Demander docs
+            </button>
+            <button mat-raised-button color="primary" (click)="updateStatus('approved')">
+              <mat-icon>check_circle</mat-icon>
+              Approuver
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Request Docs Modal -->
+  @if (showRequestDocsModal()) {
+    <div class="modal-overlay" (click)="showRequestDocsModal.set(false)">
+      <div class="modal-content small" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>Demander des documents</h2>
+          <button mat-icon-button (click)="showRequestDocsModal.set(false)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Expliquez quels documents supplementaires vous avez besoin:</p>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message</mat-label>
+            <textarea matInput [(ngModel)]="requestDocsMessage" rows="4" placeholder="Veuillez nous fournir..."></textarea>
+          </mat-form-field>
+        </div>
+        <div class="modal-footer">
+          <button mat-button (click)="showRequestDocsModal.set(false)">Annuler</button>
+          <button mat-raised-button color="primary" [disabled]="!requestDocsMessage" (click)="sendDocRequest()">
+            Envoyer la demande
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

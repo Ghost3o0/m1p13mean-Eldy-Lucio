@@ -1,0 +1,340 @@
+﻿    .checkout-container {
+      padding: 24px 16px;
+      min-height: calc(100vh - 64px - 200px);
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 24px;
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 80px 24px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+
+      mat-icon {
+        font-size: 80px;
+        width: 80px;
+        height: 80px;
+        color: var(--gray-300);
+      }
+
+      h2 {
+        margin: 16px 0 8px;
+      }
+
+      p {
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+      }
+    }
+
+    .checkout-content {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    mat-stepper {
+      background: var(--bg-primary);
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    h3 {
+      margin: 0 0 24px;
+      font-size: 1.25rem;
+    }
+
+    h4 {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .delivery-options,
+    .payment-options {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .delivery-option,
+    .payment-option {
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      border: 2px solid transparent;
+
+      &.selected {
+        border-color: var(--primary);
+        background: var(--primary-50);
+      }
+
+      &:hover:not(.selected) {
+        background: var(--bg-secondary);
+      }
+    }
+
+    .option-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: var(--primary);
+      }
+
+      .option-text {
+        display: flex;
+        flex-direction: column;
+
+        strong {
+          font-size: 1rem;
+        }
+
+        span {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+
+        .price {
+          font-weight: 600;
+          color: var(--primary);
+          margin-top: 4px;
+
+          &.free {
+            color: var(--success);
+          }
+        }
+      }
+    }
+
+    .saved-addresses {
+      margin-bottom: 24px;
+    }
+
+    .address-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .address-card {
+      cursor: pointer;
+      padding: 16px;
+      border: 2px solid transparent;
+
+      &.selected {
+        border-color: var(--primary);
+        background: var(--primary-50);
+      }
+
+      p {
+        margin: 4px 0;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      &.new-address {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-radio-button {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+      }
+    }
+
+    .pickup-info {
+      background: var(--warning-light);
+      padding: 16px;
+      border-radius: 8px;
+      color: var(--warning);
+    }
+
+    .pickup-payment-info {
+      .payment-option {
+        border: 2px solid var(--primary);
+        background: var(--primary-50);
+
+        .option-content {
+          padding: 16px 8px;
+
+          mat-icon {
+            font-size: 40px;
+            width: 40px;
+            height: 40px;
+            color: var(--primary);
+          }
+
+          .payment-methods-accepted {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--success);
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    .address-form,
+    .card-form {
+      margin-top: 24px;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+
+      mat-form-field {
+        flex: 1;
+      }
+    }
+
+    .step-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .order-review {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .review-section {
+      padding: 16px;
+
+      h4 {
+        margin-bottom: 12px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--text-secondary);
+      }
+    }
+
+    .review-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+
+      img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+
+      .item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .item-name {
+          font-weight: 500;
+        }
+
+        .item-qty {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+      }
+
+      .item-price {
+        font-weight: 500;
+      }
+    }
+
+    .notes-field {
+      margin-top: 16px;
+    }
+
+    .place-order-btn {
+      height: 48px;
+      min-width: 250px;
+    }
+
+    .order-summary {
+      position: sticky;
+      top: 88px;
+
+      mat-card-header {
+        margin-bottom: 16px;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+
+        &.discount {
+          color: var(--success);
+        }
+
+        &.total {
+          font-size: 1.25rem;
+          font-weight: 600;
+          padding-top: 16px;
+        }
+      }
+
+      mat-divider {
+        margin: 8px 0;
+      }
+    }
+
+    .security-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      color: var(--success);
+      font-size: 0.9rem;
+      margin-top: 16px;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .checkout-content {
+        grid-template-columns: 1fr;
+      }
+
+      .order-summary {
+        position: static;
+        order: -1;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
+  

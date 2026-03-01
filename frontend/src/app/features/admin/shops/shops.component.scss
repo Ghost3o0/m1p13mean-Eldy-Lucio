@@ -1,0 +1,171 @@
+.shops-container {
+  padding: 24px;
+}
+
+.shops-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 32px;
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      &.pending .stat-value {
+        color: var(--warning);
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+mat-tab-group {
+  margin-bottom: 24px;
+}
+
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+
+  .search-field {
+    flex: 1;
+    min-width: 250px;
+  }
+}
+
+.table-card {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+}
+
+.shop-logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  mat-icon {
+    color: var(--gray-300);
+  }
+}
+
+.shop-name-cell {
+  display: flex;
+  flex-direction: column;
+
+  a {
+    font-weight: 500;
+    color: var(--primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+}
+
+mat-chip {
+  &.status-pending {
+    background: var(--warning-light) !important;
+    color: var(--warning) !important;
+  }
+
+  &.status-approved {
+    background: var(--success-light) !important;
+    color: var(--success) !important;
+  }
+
+  &.status-suspended {
+    background: var(--error-light) !important;
+    color: var(--error) !important;
+  }
+
+  &.status-rejected {
+    background: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+  }
+}
+
+.shop-row {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--gray-300);
+  }
+
+  h3 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+mat-paginator {
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .shops-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

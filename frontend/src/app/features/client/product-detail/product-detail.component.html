@@ -1,0 +1,232 @@
+﻿    @if (isLoading()) {
+      <app-loading message="Chargement du produit..." fullscreen></app-loading>
+    }
+
+    @if (!isLoading() && product()) {
+      <div class="product-detail-container container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+          <a routerLink="/">Accueil</a>
+          <mat-icon>chevron_right</mat-icon>
+          <a routerLink="/catalog">Catalogue</a>
+          @if (getShop()) {
+            <mat-icon>chevron_right</mat-icon>
+            <a [routerLink]="['/shop', getShop()!._id]">{{ getShop()!.name }}</a>
+          }
+          <mat-icon>chevron_right</mat-icon>
+          <span>{{ product()!.name }}</span>
+        </div>
+
+        <div class="product-main">
+          <!-- Images Gallery -->
+          <div class="product-gallery">
+            <div class="main-image">
+              <img [src]="selectedImage()" [alt]="product()!.name">
+              @if (product()!.compareAtPrice && product()!.compareAtPrice! > product()!.basePrice) {
+                <span class="discount-badge">
+                  -{{ getDiscountPercent() }}%
+                </span>
+              }
+            </div>
+            @if (product()!.images.length > 1) {
+              <div class="thumbnail-list">
+                @for (image of product()!.images; track $index) {
+                  <button
+                    class="thumbnail"
+                    [class.active]="selectedImage() === image"
+                    (click)="selectedImage.set(image)">
+                    <img [src]="image" [alt]="product()!.name">
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Product Info -->
+          <div class="product-info">
+            <h1 class="product-name">{{ product()!.name }}</h1>
+
+            @if (getShop()) {
+              <a [routerLink]="['/shop', getShop()!._id]" class="shop-link">
+                <mat-icon>store</mat-icon>
+                {{ getShop()!.name }}
+              </a>
+            }
+
+            @if (product()!.rating?.average) {
+              <div class="rating">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <mat-icon [class.filled]="star <= product()!.rating!.average">
+                    {{ star <= product()!.rating!.average ? 'star' : 'star_border' }}
+                  </mat-icon>
+                }
+                <span>{{ product()!.rating!.average.toFixed(1) }} ({{ product()!.rating!.count }} avis)</span>
+              </div>
+            }
+
+            <div class="price-section">
+              <span class="current-price">{{ calculatePrice() | ariary }}</span>
+              @if (product()!.compareAtPrice && product()!.compareAtPrice! > product()!.basePrice) {
+                <span class="original-price">{{ product()!.compareAtPrice | ariary }}</span>
+                <span class="discount-tag">-{{ getDiscountPercent() }}%</span>
+              }
+            </div>
+
+            @if (product()!.shortDescription) {
+              <p class="short-description">{{ product()!.shortDescription }}</p>
+            }
+
+            <!-- Variations -->
+            @if (product()!.variations && product()!.variations!.length > 0) {
+              <div class="variations-section">
+                @for (variation of product()!.variations; track variation._id) {
+                  <div class="variation-group">
+                    <label>{{ variation.name }}</label>
+                    <mat-chip-listbox
+                      [value]="selectedVariations()[variation.name]"
+                      (change)="selectVariation(variation.name, $event.value)">
+                      @for (option of variation.options; track option._id) {
+                        <mat-chip-option
+                          [value]="option.value"
+                          [disabled]="option.stock <= 0"
+                          [selectable]="option.stock > 0">
+                          {{ option.value }}
+                          @if (option.priceModifier !== 0) {
+                            <span class="price-modifier">
+                              ({{ option.priceModifier > 0 ? '+' : '' }}{{ option.priceModifier | ariary }})
+                            </span>
+                          }
+                          @if (option.stock <= 0) {
+                            <span class="out-of-stock">Rupture</span>
+                          }
+                        </mat-chip-option>
+                      }
+                    </mat-chip-listbox>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Quantity & Add to Cart -->
+            <div class="purchase-section">
+              <div class="quantity-selector">
+                <button mat-icon-button (click)="decreaseQuantity()" [disabled]="quantity() <= 1">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <span class="quantity">{{ quantity() }}</span>
+                <button mat-icon-button (click)="increaseQuantity()" [disabled]="quantity() >= getMaxStock()">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+
+              <div class="stock-status" [class.in-stock]="getMaxStock() > 0" [class.out-of-stock]="getMaxStock() <= 0">
+                @if (getMaxStock() > 0) {
+                  <mat-icon>check_circle</mat-icon>
+                  <span>{{ getMaxStock() }} en stock</span>
+                } @else {
+                  <mat-icon>cancel</mat-icon>
+                  <span>Rupture de stock</span>
+                }
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button
+                mat-raised-button
+                color="primary"
+                class="add-to-cart-btn"
+                [disabled]="getMaxStock() <= 0 || isAddingToCart()"
+                (click)="addToCart()">
+                <mat-icon>add_shopping_cart</mat-icon>
+                Ajouter au panier
+              </button>
+              <button mat-stroked-button color="accent" class="favorite-btn">
+                <mat-icon>favorite_border</mat-icon>
+                Favoris
+              </button>
+            </div>
+
+            <!-- Tags -->
+            @if (product()!.tags && product()!.tags!.length > 0) {
+              <div class="tags-section">
+                <span class="tags-label">Tags:</span>
+                <mat-chip-set>
+                  @for (tag of product()!.tags; track tag) {
+                    <mat-chip [routerLink]="['/catalog']" [queryParams]="{search: tag}">
+                      {{ tag }}
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Tabs: Description & Details -->
+        <mat-tab-group class="product-tabs">
+          <mat-tab label="Description">
+            <div class="tab-content">
+              @if (product()!.description) {
+                <div [innerHTML]="product()!.description"></div>
+              } @else {
+                <p>Aucune description disponible.</p>
+              }
+            </div>
+          </mat-tab>
+          <mat-tab label="Caractéristiques">
+            <div class="tab-content">
+              <table class="specs-table">
+                <tr>
+                  <td>Référence</td>
+                  <td>{{ product()!.sku || product()!._id }}</td>
+                </tr>
+                @if (getShop()) {
+                  <tr>
+                    <td>Vendeur</td>
+                    <td>{{ getShop()!.name }}</td>
+                  </tr>
+                }
+                @if (product()!.variations) {
+                  @for (variation of product()!.variations; track variation._id) {
+                    <tr>
+                      <td>{{ variation.name }}</td>
+                      <td>{{ getVariationValues(variation) }}</td>
+                    </tr>
+                  }
+                }
+              </table>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+
+        <!-- Related Products -->
+        @if (relatedProducts().length > 0) {
+          <section class="related-products">
+            <h2>Produits similaires</h2>
+            <div class="products-grid">
+              @for (related of relatedProducts(); track related._id) {
+                <mat-card class="product-card" [routerLink]="['/product', related._id]">
+                  <img [src]="related.images[0] || '/assets/placeholder.png'" [alt]="related.name" class="product-image">
+                  <mat-card-content>
+                    <h3>{{ related.name }}</h3>
+                    <span class="price">{{ related.basePrice | ariary }}</span>
+                  </mat-card-content>
+                </mat-card>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    }
+
+    @if (!isLoading() && !product()) {
+      <div class="not-found container">
+        <mat-icon>error_outline</mat-icon>
+        <h2>Produit non trouvé</h2>
+        <p>Le produit que vous recherchez n'existe pas ou a été supprimé.</p>
+        <a routerLink="/catalog" mat-raised-button color="primary">
+          Retour au catalogue
+        </a>
+      </div>
+    }
+  

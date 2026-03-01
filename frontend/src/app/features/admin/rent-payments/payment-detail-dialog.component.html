@@ -1,0 +1,123 @@
+﻿    <h2 mat-dialog-title>Détails du paiement</h2>
+    <mat-dialog-content>
+      <div class="payment-details">
+        <!-- Header -->
+        <div class="detail-header">
+          <span class="payment-number">{{ data.payment.paymentNumber }}</span>
+          <mat-chip [class]="'status-' + data.payment.status">
+            {{ getStatusLabel(data.payment.status) }}
+          </mat-chip>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Shop & Box Info -->
+        <div class="detail-section">
+          <h3>Boutique</h3>
+          <div class="detail-row">
+            <mat-icon>store</mat-icon>
+            <span>{{ getShopName(data.payment.shopId) }}</span>
+          </div>
+          @if (data.payment.boxId) {
+            <div class="detail-row">
+              <mat-icon>business</mat-icon>
+              <span>{{ getBoxName(data.payment.boxId) }}</span>
+            </div>
+          }
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Period & Amount -->
+        <div class="detail-section">
+          <h3>Paiement</h3>
+          <div class="detail-row">
+            <mat-icon>calendar_month</mat-icon>
+            <span>Période: {{ getMonthLabel(data.payment.period?.month) }} {{ data.payment.period?.year }}</span>
+          </div>
+          <div class="detail-row amount-row">
+            <mat-icon>payments</mat-icon>
+            <span class="amount">{{ data.payment.amount | number:'1.2-2' }} Ar</span>
+          </div>
+          <div class="detail-row">
+            <mat-icon>{{ getMethodIcon(data.payment.paymentMethod) }}</mat-icon>
+            <span>{{ getMethodLabel(data.payment.paymentMethod) }}</span>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Dates -->
+        <div class="detail-section">
+          <h3>Dates</h3>
+          <div class="detail-row">
+            <mat-icon>event</mat-icon>
+            <span>Date de paiement: {{ data.payment.paymentDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-row">
+            <mat-icon>schedule</mat-icon>
+            <span>Échéance: {{ data.payment.dueDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detail-row">
+            <mat-icon>add_circle</mat-icon>
+            <span>Soumis le: {{ data.payment.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+
+        <!-- Validation Info -->
+        @if (data.payment.validation?.validatedAt) {
+          <mat-divider></mat-divider>
+          <div class="detail-section">
+            <h3>Validation</h3>
+            <div class="detail-row">
+              <mat-icon>check_circle</mat-icon>
+              <span>Validé le: {{ data.payment.validation?.validatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            @if (data.payment.validation?.rejectionReason) {
+              <div class="detail-row rejection">
+                <mat-icon>info</mat-icon>
+                <span>Raison: {{ data.payment.validation?.rejectionReason }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Invoice -->
+        @if (data.payment.invoice?.number) {
+          <mat-divider></mat-divider>
+          <div class="detail-section">
+            <h3>Facture</h3>
+            <div class="detail-row">
+              <mat-icon>receipt</mat-icon>
+              <span>N°: {{ data.payment.invoice?.number }}</span>
+            </div>
+            @if (data.payment.invoice?.path) {
+              <button mat-stroked-button color="primary" (click)="openInvoice()">
+                <mat-icon>download</mat-icon>
+                Télécharger la facture
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Proof -->
+        @if (data.payment.paymentProof?.length) {
+          <mat-divider></mat-divider>
+          <div class="detail-section">
+            <h3>Justificatifs</h3>
+            <div class="proofs-list">
+              @for (proof of data.payment.paymentProof; track proof.filename) {
+                <button mat-stroked-button (click)="openProof(proof)">
+                  <mat-icon>attach_file</mat-icon>
+                  {{ proof.filename }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Fermer</button>
+    </mat-dialog-actions>
+  

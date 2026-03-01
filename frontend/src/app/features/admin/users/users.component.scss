@@ -1,0 +1,54 @@
+.users-container {
+  padding: 24px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+}
+
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 250px;
+}
+
+table {
+  width: 100%;
+}
+
+mat-chip {
+  &.role-admin {
+    background: var(--primary-50) !important;
+    color: var(--primary) !important;
+  }
+
+  &.role-shop {
+    background: var(--warning-light) !important;
+    color: var(--warning) !important;
+  }
+
+  &.role-client {
+    background: var(--success-light) !important;
+    color: var(--success) !important;
+  }
+
+  &.status-active {
+    background: var(--success-light) !important;
+    color: var(--success) !important;
+  }
+
+  &.status-inactive {
+    background: var(--error-light) !important;
+    color: var(--error) !important;
+  }
+}

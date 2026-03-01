@@ -1,0 +1,100 @@
+﻿    <div class="orders-container container">
+      <h1>Mes commandes</h1>
+
+      <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
+        <mat-tab label="Toutes"></mat-tab>
+        <mat-tab label="En cours"></mat-tab>
+        <mat-tab label="Terminées"></mat-tab>
+        <mat-tab label="Annulées"></mat-tab>
+      </mat-tab-group>
+
+      @if (isLoading()) {
+        <app-loading message="Chargement des commandes..."></app-loading>
+      }
+
+      @if (!isLoading()) {
+        @if (orders().length === 0) {
+          <div class="empty-orders">
+            <mat-icon>receipt_long</mat-icon>
+            <h2>Aucune commande</h2>
+            <p>Vous n'avez pas encore passé de commande.</p>
+            <a routerLink="/catalog" mat-raised-button color="primary">
+              Explorer le catalogue
+            </a>
+          </div>
+        } @else {
+          <div class="orders-list">
+            @for (order of orders(); track order._id) {
+              <mat-card class="order-card" [routerLink]="['/orders', order._id]">
+                <div class="order-header">
+                  <div class="order-info">
+                    <span class="order-number">Commande #{{ order.orderNumber }}</span>
+                    <span class="order-date">{{ order.createdAt | date:'dd/MM/yyyy à HH:mm' }}</span>
+                  </div>
+                  <mat-chip [class]="'status-' + order.status">
+                    {{ getStatusLabel(order.status) }}
+                  </mat-chip>
+                </div>
+
+                <div class="order-items">
+                  @for (item of order.items.slice(0, 3); track item._id) {
+                    <div class="order-item">
+                      <img [src]="item.image || '/assets/placeholder.png'" [alt]="item.name">
+                      <div class="item-info">
+                        <span class="item-name">{{ item.name }}</span>
+                        <span class="item-qty">Qté: {{ item.quantity }}</span>
+                      </div>
+                    </div>
+                  }
+                  @if (order.items.length > 3) {
+                    <div class="more-items">
+                      +{{ order.items.length - 3 }} autres articles
+                    </div>
+                  }
+                </div>
+
+                <div class="order-footer">
+                  <div class="delivery-info">
+                    <mat-icon>{{ order.deliveryMethod === 'delivery' ? 'local_shipping' : 'store' }}</mat-icon>
+                    <span>{{ order.deliveryMethod === 'delivery' ? 'Livraison' : 'Retrait en boutique' }}</span>
+                  </div>
+                  <div class="order-total">
+                    <span>Total:</span>
+                    <strong>{{ order.total | ariary }}</strong>
+                  </div>
+                </div>
+
+                @if (canCancel(order)) {
+                  <div class="order-actions">
+                    <button mat-stroked-button color="warn" (click)="cancelOrder($event, order)">
+                      Annuler la commande
+                    </button>
+                  </div>
+                }
+
+                @if (canRate(order)) {
+                  <div class="order-actions">
+                    <button mat-stroked-button color="primary" (click)="rateOrder($event, order)">
+                      <mat-icon>star</mat-icon>
+                      Laisser un avis
+                    </button>
+                  </div>
+                }
+              </mat-card>
+            }
+          </div>
+
+          @if (pagination() && pagination()!.totalPages > 1) {
+            <mat-paginator
+              [length]="pagination()!.total"
+              [pageSize]="pagination()!.limit"
+              [pageIndex]="pagination()!.page - 1"
+              [pageSizeOptions]="[10, 20, 50]"
+              (page)="onPageChange($event)"
+              showFirstLastButtons>
+            </mat-paginator>
+          }
+        }
+      }
+    </div>
+  

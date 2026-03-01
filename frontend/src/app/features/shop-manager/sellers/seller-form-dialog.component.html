@@ -1,0 +1,77 @@
+﻿    <h2 mat-dialog-title>{{ data.seller ? 'Modifier le vendeur' : 'Nouveau vendeur' }}</h2>
+    <mat-dialog-content>
+      <form class="seller-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Prénom</mat-label>
+            <input matInput [(ngModel)]="formData.firstName" name="firstName" required>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nom</mat-label>
+            <input matInput [(ngModel)]="formData.lastName" name="lastName" required>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput [(ngModel)]="formData.email" name="email" type="email" required>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Téléphone</mat-label>
+            <input matInput [(ngModel)]="formData.phone" name="phone">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>ID Employé</mat-label>
+            <input matInput [(ngModel)]="formData.employeeId" name="employeeId" placeholder="EMP-001">
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <div class="permissions-section">
+          <h3>Permissions</h3>
+          <div class="permissions-grid">
+            <mat-checkbox [(ngModel)]="formData.permissions.sales" name="permSales">
+              <mat-icon>point_of_sale</mat-icon>
+              Ventes
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="formData.permissions.stock" name="permStock">
+              <mat-icon>inventory</mat-icon>
+              Stock
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="formData.permissions.cashRegister" name="permCash">
+              <mat-icon>calculate</mat-icon>
+              Caisse
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="formData.permissions.orders" name="permOrders">
+              <mat-icon>shopping_cart</mat-icon>
+              Commandes
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="formData.permissions.customers" name="permCustomers">
+              <mat-icon>people</mat-icon>
+              Clients
+            </mat-checkbox>
+            <mat-checkbox [(ngModel)]="formData.permissions.reports" name="permReports">
+              <mat-icon>analytics</mat-icon>
+              Rapports
+            </mat-checkbox>
+          </div>
+        </div>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Annuler</button>
+      <button mat-raised-button color="primary" (click)="save()"
+              [disabled]="isSaving() || !formData.firstName || !formData.lastName || !formData.email">
+        @if (isSaving()) {
+          Enregistrement...
+        } @else {
+          {{ data.seller ? 'Modifier' : 'Créer' }}
+        }
+      </button>
+    </mat-dialog-actions>
+  

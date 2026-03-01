@@ -1,0 +1,204 @@
+<div class="landing-container">
+  <mat-tab-group>
+    <!-- Hero Tab -->
+    <mat-tab label="Héros">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Section Héros</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Titre principal</mat-label>
+                <input matInput [(ngModel)]="formData.hero.title" name="heroTitle">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Sous-titre</mat-label>
+                <input matInput [(ngModel)]="formData.hero.subtitle" name="heroSubtitle">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Bouton CTA</mat-label>
+                <input matInput [(ngModel)]="formData.hero.ctaText" name="heroCta">
+              </mat-form-field>
+              <div class="image-upload">
+                <label>Image de fond</label>
+                <div class="upload-area" (click)="heroImageInput.click()">
+                  @if (heroImage()) {
+                    <img [src]="heroImage()" alt="Hero preview">
+                  } @else {
+                    <mat-icon>cloud_upload</mat-icon>
+                    <p>Cliquez pour importer une image</p>
+                  }
+                </div>
+                <input #heroImageInput type="file" hidden (change)="onHeroImageSelected($event)" accept="image/*">
+              </div>
+              <div class="form-actions">
+                <button mat-raised-button color="primary" (click)="saveHero()">
+                  <mat-icon>save</mat-icon>
+                  Enregistrer
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Banners Tab -->
+    <mat-tab label="Bannières">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Bannières promotionnelles</mat-card-title>
+            <button mat-raised-button color="accent" (click)="addBanner()">
+              <mat-icon>add</mat-icon>
+              Ajouter une bannière
+            </button>
+          </mat-card-header>
+          <mat-card-content>
+            @if (banners().length > 0) {
+              <div cdkDropList
+                   #bannerList="cdkDropList"
+                   [cdkDropListData]="banners()"
+                   cdkDropListSortingDisabled
+                   class="banners-list"
+                   (cdkDropListDropped)="onBannerDrop($event)">
+                @for (banner of banners(); track banner._id; let i = $index) {
+                  <div class="banner-item" cdkDrag>
+                    <div class="drag-handle">
+                      <mat-icon cdkDragHandle>drag_handle</mat-icon>
+                    </div>
+                    <div class="banner-preview">
+                      @if (banner.image) {
+                        <img [src]="banner.image" [alt]="banner.title">
+                      } @else {
+                        <mat-icon>image</mat-icon>
+                      }
+                    </div>
+                    <div class="banner-details">
+                      <h3>{{ banner.title }}</h3>
+                      <p>{{ banner.description }}</p>
+                      <mat-chip>{{ banner.type }}</mat-chip>
+                    </div>
+                    <div class="banner-actions">
+                      <button mat-icon-button (click)="editBanner(banner)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteBanner(i)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-state">
+                <mat-icon>image</mat-icon>
+                <p>Aucune bannière</p>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Info Tab -->
+    <mat-tab label="Informations">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Informations de contact</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Adresse</mat-label>
+                <input matInput [(ngModel)]="formData.platformContent.generalInfo.address" name="infoAddress">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Téléphone</mat-label>
+                <input matInput [(ngModel)]="formData.platformContent.generalInfo.phone" name="infoPhone">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Email</mat-label>
+                <input matInput [(ngModel)]="formData.platformContent.generalInfo.email" name="infoEmail">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Horaires</mat-label>
+                <input matInput [(ngModel)]="formData.platformContent.generalInfo.hours" name="infoHours">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>À propos</mat-label>
+                <textarea matInput rows="4" [(ngModel)]="formData.platformContent.generalInfo.description" name="infoAbout"></textarea>
+              </mat-form-field>
+              <button mat-raised-button color="primary" (click)="saveInfo()">
+                <mat-icon>save</mat-icon>
+                Enregistrer
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Social Tab -->
+    <mat-tab label="Réseaux sociaux">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Liens de réseaux sociaux</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form>
+              <div class="social-links">
+                @for (link of socialLinks; track link.name) {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ link.name }}</mat-label>
+                    <mat-icon matPrefix>{{ link.icon }}</mat-icon>
+                    <input matInput [(ngModel)]="formData.platformContent.socialLinks[link.name]" name="social_{{link.name}}">
+                  </mat-form-field>
+                }
+              </div>
+              <button mat-raised-button color="primary" (click)="saveSocial()">
+                <mat-icon>save</mat-icon>
+                Enregistrer
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- SEO Tab -->
+    <mat-tab label="SEO">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Paramètres SEO</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Titre SEO</mat-label>
+                <input matInput [(ngModel)]="formData.platformContent.seo.metaTitle" name="seoTitle">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description SEO</mat-label>
+                <textarea matInput rows="3" [(ngModel)]="formData.platformContent.seo.metaDescription" name="seoDescription"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Mots-clés (séparés par des virgules)</mat-label>
+                <textarea matInput rows="2" [(ngModel)]="seoKeywords" name="seoKeywords"></textarea>
+              </mat-form-field>
+              <button mat-raised-button color="primary" (click)="saveSeo()">
+                <mat-icon>save</mat-icon>
+                Enregistrer
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

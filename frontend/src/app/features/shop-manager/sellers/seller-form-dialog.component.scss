@@ -1,0 +1,69 @@
+﻿    mat-dialog-content {
+      min-width: 400px;
+    }
+
+    .seller-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 0;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+
+      mat-form-field {
+        flex: 1;
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-divider {
+      margin: 8px 0;
+    }
+
+    .permissions-section {
+      padding: 16px 0;
+
+      h3 {
+        margin: 0 0 16px 0;
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
+    }
+
+    .permissions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+
+      mat-checkbox {
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+          margin-right: 8px;
+          vertical-align: middle;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    @media (max-width: 600px) {
+      mat-dialog-content {
+        min-width: auto;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .permissions-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  

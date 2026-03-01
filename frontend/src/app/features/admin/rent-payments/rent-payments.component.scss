@@ -1,0 +1,179 @@
+.payments-container {
+  padding: 24px;
+}
+
+.payments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: 8px;
+    button mat-icon {
+      margin-right: 4px;
+    }
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 32px;
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+      }
+
+      &.pending .stat-value {
+        color: var(--warning);
+      }
+
+      &.late .stat-value {
+        color: var(--error);
+      }
+
+      &.validated .stat-value {
+        color: var(--success);
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+mat-tab-group {
+  margin-bottom: 24px;
+}
+
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.table-card {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+}
+
+.payment-number {
+  font-family: monospace;
+  font-weight: 500;
+}
+
+.shop-cell {
+  display: flex;
+  flex-direction: column;
+
+  .shop-name {
+    font-weight: 500;
+  }
+
+  .box-name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.method-chip {
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+}
+
+mat-chip {
+  &.status-pending {
+    background: var(--warning-light) !important;
+    color: var(--warning) !important;
+  }
+  &.status-validated {
+    background: var(--success-light) !important;
+    color: var(--success) !important;
+  }
+  &.status-rejected {
+    background: var(--error-light) !important;
+    color: var(--error) !important;
+  }
+  &.status-late {
+    background: var(--error-light) !important;
+    color: var(--error) !important;
+  }
+}
+
+.payment-row {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--gray-300);
+  }
+
+  h3 {
+    margin: 16px 0 8px;
+  }
+
+  p {
+    color: var(--text-secondary);
+  }
+}
+
+mat-paginator {
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .payments-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,89 @@
+﻿    <div class="chat-widget">
+      <!-- Chat Toggle Button -->
+      <button
+        class="chat-toggle-btn"
+        (click)="toggleChat()"
+        [class.chat-open]="isOpen()">
+        <mat-icon>{{ isOpen() ? 'close' : 'chat' }}</mat-icon>
+      </button>
+
+      <!-- Chat Window -->
+      @if (isOpen()) {
+        <div class="chat-window" [@.disabled]="true">
+          <!-- Header -->
+          <div class="chat-header">
+            <div class="header-info">
+              <mat-icon>support_agent</mat-icon>
+              <div class="header-text">
+                <span class="header-title">Assistant Bazar'Be</span>
+                <span class="header-status">En ligne</span>
+              </div>
+            </div>
+            <button mat-icon-button (click)="toggleChat()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          <!-- Messages -->
+          <div class="chat-messages" #messagesContainer>
+            @for (message of messages(); track $index) {
+              <div class="message" [class.user-message]="message.isUser" [class.bot-message]="!message.isUser">
+                @if (!message.isUser) {
+                  <div class="message-avatar">
+                    <mat-icon>smart_toy</mat-icon>
+                  </div>
+                }
+                <div class="message-content">
+                  <div class="message-text" [innerHTML]="formatMessage(message.text)"></div>
+                  <span class="message-time">{{ formatTime(message.timestamp) }}</span>
+                </div>
+              </div>
+            }
+
+            @if (isLoading()) {
+              <div class="message bot-message">
+                <div class="message-avatar">
+                  <mat-icon>smart_toy</mat-icon>
+                </div>
+                <div class="message-content">
+                  <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Suggestions -->
+          @if (suggestions().length > 0 && !isLoading()) {
+            <div class="suggestions">
+              @for (suggestion of suggestions(); track suggestion) {
+                <button class="suggestion-btn" (click)="sendSuggestion(suggestion)">
+                  {{ suggestion }}
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Input -->
+          <div class="chat-input">
+            <input
+              type="text"
+              [(ngModel)]="userInput"
+              (keyup.enter)="sendMessage()"
+              placeholder="Tapez votre message..."
+              [disabled]="isLoading()">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="sendMessage()"
+              [disabled]="!userInput.trim() || isLoading()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  

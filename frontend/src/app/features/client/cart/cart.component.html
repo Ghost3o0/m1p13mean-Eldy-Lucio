@@ -1,0 +1,153 @@
+﻿    <div class="cart-container container">
+      <h1>Mon panier</h1>
+
+      @if (cartService.isLoading()) {
+        <app-loading message="Chargement du panier..."></app-loading>
+      }
+
+      @if (!cartService.isLoading()) {
+        @if (!isLoggedIn()) {
+          <div class="login-prompt">
+            <mat-icon>shopping_cart</mat-icon>
+            <h2>Connectez-vous pour voir votre panier</h2>
+            <p>Vous devez être connecté pour ajouter des articles et passer commande.</p>
+            <a routerLink="/auth/login" [queryParams]="{returnUrl: '/cart'}" mat-raised-button color="primary">
+              Se connecter
+            </a>
+          </div>
+        } @else if (!cart() || cart()!.items.length === 0) {
+          <div class="empty-cart">
+            <mat-icon>remove_shopping_cart</mat-icon>
+            <h2>Votre panier est vide</h2>
+            <p>Découvrez nos produits et ajoutez-les à votre panier.</p>
+            <a routerLink="/catalog" mat-raised-button color="primary">
+              Explorer le catalogue
+            </a>
+          </div>
+        } @else {
+          <div class="cart-content">
+            <!-- Cart Items -->
+            <div class="cart-items">
+              @for (shopGroup of groupedItems(); track shopGroup.shopId) {
+                <mat-card class="shop-group">
+                  <div class="shop-header">
+                    <mat-icon>store</mat-icon>
+                    <span class="shop-name">{{ shopGroup.shopName }}</span>
+                  </div>
+
+                  @for (item of shopGroup.items; track item._id) {
+                    <div class="cart-item">
+                      <img [src]="item.product?.images?.[0] || '/assets/placeholder.png'" [alt]="item.product?.name" class="item-image">
+                      <div class="item-details">
+                        <a [routerLink]="['/product', item.productId]" class="item-name">
+                          {{ item.product?.name || 'Produit' }}
+                        </a>
+                        @if (item.variation && getVariationText(item.variation)) {
+                          <span class="item-variation">{{ getVariationText(item.variation) }}</span>
+                        }
+                        <span class="item-price">{{ item.unitPrice | ariary }}</span>
+                      </div>
+                      <div class="item-quantity">
+                        <button mat-icon-button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1 || isUpdating()">
+                          <mat-icon>remove</mat-icon>
+                        </button>
+                        <span>{{ item.quantity }}</span>
+                        <button mat-icon-button (click)="updateQuantity(item, item.quantity + 1)" [disabled]="isUpdating()">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                      <div class="item-total">
+                        {{ item.unitPrice * item.quantity | ariary }}
+                      </div>
+                      <button mat-icon-button color="warn" (click)="removeItem(item)" [disabled]="isUpdating()">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  }
+
+                  <!-- Promo Code for this shop -->
+                  <div class="promo-section">
+                    <mat-form-field appearance="outline" class="promo-input">
+                      <mat-label>Code promo</mat-label>
+                      <input matInput [(ngModel)]="promoCodes[shopGroup.shopId]" placeholder="Entrez votre code">
+                    </mat-form-field>
+                    <button mat-stroked-button color="primary" (click)="applyPromoCode(shopGroup.shopId)" [disabled]="!promoCodes[shopGroup.shopId]">
+                      Appliquer
+                    </button>
+                  </div>
+
+                  <div class="shop-subtotal">
+                    <span>Sous-total</span>
+                    <span>{{ shopGroup.subtotal | ariary }}</span>
+                  </div>
+                </mat-card>
+              }
+            </div>
+
+            <!-- Order Summary -->
+            <div class="order-summary">
+              <mat-card>
+                <mat-card-header>
+                  <mat-card-title>Récapitulatif</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="summary-row">
+                    <span>Sous-total ({{ cart()!.itemCount }} articles)</span>
+                    <span>{{ cart()!.subtotal | ariary }}</span>
+                  </div>
+                  @if (cart()!.discount && cart()!.discount! > 0) {
+                    <div class="summary-row discount">
+                      <span>Réduction</span>
+                      <span>-{{ cart()!.discount | ariary }}</span>
+                    </div>
+                  }
+                  <div class="summary-row">
+                    <span>Frais de livraison</span>
+                    <span>{{ cart()!.deliveryFee || 0 | ariary }}</span>
+                  </div>
+                  <mat-divider></mat-divider>
+                  <div class="summary-row total">
+                    <span>Total</span>
+                    <span>{{ calculateTotal() | ariary }}</span>
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <a routerLink="/checkout" mat-raised-button color="primary" class="checkout-btn">
+                    Passer la commande
+                  </a>
+                  <button mat-button color="warn" (click)="clearCart()">
+                    Vider le panier
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+
+              <!-- Benefits -->
+              <div class="benefits">
+                <div class="benefit">
+                  <mat-icon>local_shipping</mat-icon>
+                  <div>
+                    <strong>Livraison gratuite</strong>
+                    <span>À partir de 50€ d'achat</span>
+                  </div>
+                </div>
+                <div class="benefit">
+                  <mat-icon>replay</mat-icon>
+                  <div>
+                    <strong>Retours gratuits</strong>
+                    <span>Sous 30 jours</span>
+                  </div>
+                </div>
+                <div class="benefit">
+                  <mat-icon>security</mat-icon>
+                  <div>
+                    <strong>Paiement sécurisé</strong>
+                    <span>SSL 256 bits</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  

@@ -1,0 +1,193 @@
+<div class="requests-container">
+  <div class="requests-header">
+    <h1>Demandes des boutiques</h1>
+    <div class="header-stats">
+      <div class="stat pending">
+        <span class="stat-value">{{ stats()?.pending || 0 }}</span>
+        <span class="stat-label">En attente</span>
+      </div>
+      <div class="stat urgent">
+        <span class="stat-value">{{ stats()?.urgent || 0 }}</span>
+        <span class="stat-label">Urgentes</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">{{ stats()?.inReview || 0 }}</span>
+        <span class="stat-label">En cours</span>
+      </div>
+    </div>
+  </div>
+
+  <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
+    <mat-tab label="Toutes"></mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        En attente
+        @if (stats()?.pending) {
+          <span class="badge">{{ stats()?.pending }}</span>
+        }
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="En cours"></mat-tab>
+    <mat-tab label="Traitées"></mat-tab>
+  </mat-tab-group>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Type de demande</mat-label>
+          <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilters()">
+            <mat-option [value]="null">Tous</mat-option>
+            <mat-option value="box_change">Changement de box</mat-option>
+            <mat-option value="problem_report">Signalement</mat-option>
+            <mat-option value="termination">Résiliation</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-icon-button (click)="clearFilters()" matTooltip="Réinitialiser">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (isLoading()) {
+    <app-loading message="Chargement des demandes..."></app-loading>
+  }
+
+  @if (!isLoading()) {
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="requests()">
+        <!-- Request Number -->
+        <ng-container matColumnDef="requestNumber">
+          <th mat-header-cell *matHeaderCellDef>N° Demande</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="request-number">{{ request.requestNumber }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Type -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let request">
+            <mat-chip [class]="'type-' + request.type">
+              <mat-icon>{{ getTypeIcon(request.type) }}</mat-icon>
+              {{ getTypeLabel(request.type) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Shop -->
+        <ng-container matColumnDef="shop">
+          <th mat-header-cell *matHeaderCellDef>Boutique</th>
+          <td mat-cell *matCellDef="let request">
+            {{ getShopName(request.shopId) }}
+          </td>
+        </ng-container>
+
+        <!-- Summary -->
+        <ng-container matColumnDef="summary">
+          <th mat-header-cell *matHeaderCellDef>Résumé</th>
+          <td mat-cell *matCellDef="let request">
+            <span class="summary">{{ getRequestSummary(request) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Urgency -->
+        <ng-container matColumnDef="urgency">
+          <th mat-header-cell *matHeaderCellDef>Urgence</th>
+          <td mat-cell *matCellDef="let request">
+            @if (request.problemReport?.urgency) {
+              <mat-chip [class]="'urgency-' + request.problemReport.urgency">
+                {{ getUrgencyLabel(request.problemReport.urgency) }}
+              </mat-chip>
+            } @else {
+              -
+            }
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let request">
+            <mat-chip [class]="'status-' + request.status">
+              {{ getStatusLabel(request.status) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Date -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let request">
+            {{ request.createdAt | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let request">
+            <button mat-icon-button [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="viewDetails(request)">
+                <mat-icon>visibility</mat-icon>
+                <span>Voir les détails</span>
+              </button>
+              <mat-divider></mat-divider>
+              @if (request.status === 'pending') {
+                <button mat-menu-item (click)="startReview(request)">
+                  <mat-icon>rate_review</mat-icon>
+                  <span>Commencer l'examen</span>
+                </button>
+              }
+              @if (request.status === 'pending' || request.status === 'in_review') {
+                <button mat-menu-item (click)="approveRequest(request)">
+                  <mat-icon color="primary">check_circle</mat-icon>
+                  <span>Approuver</span>
+                </button>
+                <button mat-menu-item (click)="rejectRequest(request)">
+                  <mat-icon color="warn">cancel</mat-icon>
+                  <span>Rejeter</span>
+                </button>
+              }
+              @if (request.status === 'approved') {
+                <button mat-menu-item (click)="completeRequest(request)">
+                  <mat-icon>task_alt</mat-icon>
+                  <span>Marquer comme terminé</span>
+                </button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+            class="request-row"
+            [class.urgent]="row.problemReport?.urgency === 'urgent' || row.problemReport?.urgency === 'critical'">
+        </tr>
+      </table>
+
+      @if (requests().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <h3>Aucune demande</h3>
+          <p>Aucune demande ne correspond à vos critères.</p>
+        </div>
+      }
+
+      <mat-paginator
+        [length]="pagination()?.total || 0"
+        [pageSize]="pagination()?.limit || 20"
+        [pageIndex]="(pagination()?.page || 1) - 1"
+        [pageSizeOptions]="[10, 20, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card>
+  }
+</div>

@@ -1,0 +1,214 @@
+<div class="tickets-container">
+  <div class="tickets-header">
+    <h1>Support - Tickets</h1>
+    <div class="header-stats">
+      <div class="stat open">
+        <span class="stat-value">{{ openCount() }}</span>
+        <span class="stat-label">Ouverts</span>
+      </div>
+      <div class="stat in-progress">
+        <span class="stat-value">{{ inProgressCount() }}</span>
+        <span class="stat-label">En cours</span>
+      </div>
+      <div class="stat resolved">
+        <span class="stat-value">{{ resolvedCount() }}</span>
+        <span class="stat-label">Résolus</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Rechercher</mat-label>
+          <input matInput [(ngModel)]="searchQuery" (keyup.enter)="loadTickets()" placeholder="Sujet, utilisateur...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Statut</mat-label>
+          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="loadTickets()">
+            <mat-option [value]="null">Tous</mat-option>
+            <mat-option value="open">Ouverts</mat-option>
+            <mat-option value="in_progress">En cours</mat-option>
+            <mat-option value="resolved">Résolus</mat-option>
+            <mat-option value="closed">Fermés</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Priorité</mat-label>
+          <mat-select [(ngModel)]="selectedPriority" (selectionChange)="loadTickets()">
+            <mat-option [value]="null">Toutes</mat-option>
+            <mat-option value="high">Haute</mat-option>
+            <mat-option value="medium">Moyenne</mat-option>
+            <mat-option value="low">Basse</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  @if (isLoading()) {
+    <app-loading message="Chargement des tickets..."></app-loading>
+  } @else {
+    <mat-card class="tickets-card">
+      @if (tickets().length > 0) {
+        <table mat-table [dataSource]="tickets()">
+          <ng-container matColumnDef="priority">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let ticket">
+              <div class="priority-indicator" [class]="'priority-' + ticket.priority"></div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="subject">
+            <th mat-header-cell *matHeaderCellDef>Sujet</th>
+            <td mat-cell *matCellDef="let ticket">
+              <div class="ticket-subject">
+                <span class="subject-text">{{ ticket.subject }}</span>
+                @if (ticket.orderId) {
+                  <span class="order-ref">Commande #{{ ticket.orderId.orderNumber }}</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="user">
+            <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+            <td mat-cell *matCellDef="let ticket">
+              <div class="user-info">
+                <span class="user-name">{{ ticket.userId?.firstName }} {{ ticket.userId?.lastName }}</span>
+                <span class="user-email">{{ ticket.userId?.email }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let ticket">
+              <mat-chip [class]="'status-' + ticket.status">
+                {{ getStatusLabel(ticket.status) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="messages">
+            <th mat-header-cell *matHeaderCellDef>Messages</th>
+            <td mat-cell *matCellDef="let ticket">
+              <span class="message-count">{{ ticket.messages?.length || 0 }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let ticket">{{ ticket.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let ticket">
+              <button mat-icon-button (click)="openTicketDetail(ticket)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              [class.unread]="row.status === 'open'"
+              (click)="openTicketDetail(row)"></tr>
+        </table>
+
+        <mat-paginator
+          [length]="pagination()?.total || 0"
+          [pageSize]="20"
+          (page)="onPageChange($event)">
+        </mat-paginator>
+      } @else {
+        <div class="empty-state">
+          <mat-icon>support_agent</mat-icon>
+          <h3>Aucun ticket</h3>
+          <p>Aucun ticket ne correspond à vos critères.</p>
+        </div>
+      }
+    </mat-card>
+  }
+
+  <!-- Ticket Detail Panel -->
+  @if (selectedTicket()) {
+    <div class="ticket-detail-overlay" (click)="closeTicketDetail()"></div>
+    <div class="ticket-detail-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h2>{{ selectedTicket()!.subject }}</h2>
+          <mat-chip [class]="'status-' + selectedTicket()!.status">
+            {{ getStatusLabel(selectedTicket()!.status) }}
+          </mat-chip>
+        </div>
+        <button mat-icon-button (click)="closeTicketDetail()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="ticket-meta">
+        <div class="meta-item">
+          <mat-icon>person</mat-icon>
+          <span>{{ selectedTicket()!.userId?.firstName }} {{ selectedTicket()!.userId?.lastName }}</span>
+        </div>
+        <div class="meta-item">
+          <mat-icon>email</mat-icon>
+          <span>{{ selectedTicket()!.userId?.email }}</span>
+        </div>
+        <div class="meta-item">
+          <mat-icon>schedule</mat-icon>
+          <span>{{ selectedTicket()!.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        @if (selectedTicket()!.orderId) {
+          <div class="meta-item">
+            <mat-icon>receipt</mat-icon>
+            <span>Commande #{{ selectedTicket()!.orderId.orderNumber }}</span>
+          </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="messages-container">
+        @for (message of selectedTicket()!.messages || []; track $index) {
+          <div class="message" [class.admin-message]="message.isAdmin">
+            <div class="message-header">
+              <span class="sender">{{ message.isAdmin ? 'Support' : (selectedTicket()!.userId?.firstName || 'Client') }}</span>
+              <span class="time">{{ message.createdAt | date:'dd/MM HH:mm' }}</span>
+            </div>
+            <p class="message-content">{{ message.content }}</p>
+          </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="reply-section">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Répondre</mat-label>
+          <textarea matInput [(ngModel)]="replyMessage" rows="3" placeholder="Votre réponse..."></textarea>
+        </mat-form-field>
+        <div class="reply-actions">
+          <mat-form-field appearance="outline">
+            <mat-label>Statut</mat-label>
+            <mat-select [(ngModel)]="newStatus">
+              <mat-option value="open">Ouvert</mat-option>
+              <mat-option value="in_progress">En cours</mat-option>
+              <mat-option value="resolved">Résolu</mat-option>
+              <mat-option value="closed">Fermé</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="sendReply()" [disabled]="!replyMessage.trim()">
+            <mat-icon>send</mat-icon>
+            Envoyer
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

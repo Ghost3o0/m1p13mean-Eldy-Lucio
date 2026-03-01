@@ -1,0 +1,281 @@
+<div class="shops-container">
+  <div class="shop-header">
+    <button mat-icon-button routerLink="/admin/shops">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="shop-identity">
+      <div class="shop-logo">
+        @if (shop()!.logo) {
+          <img [src]="shop()!.logo" [alt]="shop()!.name">
+        } @else {
+          <mat-icon>store</mat-icon>
+        }
+      </div>
+      <div class="shop-info">
+        <h1>{{ shop()!.name }}</h1>
+        <mat-chip [class]="'status-' + shop()!.status">
+          {{ getStatusLabel(shop()!.status) }}
+        </mat-chip>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button [routerLink]="['/shop', shop()!._id]" target="_blank">
+        <mat-icon>open_in_new</mat-icon>
+        Voir la page
+      </button>
+      <button mat-icon-button [matMenuTriggerFor]="actionsMenu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #actionsMenu="matMenu">
+        @if (shop()!.status === 'pending') {
+          <button mat-menu-item (click)="updateStatus('approved')">
+            <mat-icon>check_circle</mat-icon>
+            <span>Approuver</span>
+          </button>
+          <button mat-menu-item (click)="updateStatus('rejected')">
+            <mat-icon>cancel</mat-icon>
+            <span>Rejeter</span>
+          </button>
+        }
+        @if (shop()!.status === 'approved') {
+          <button mat-menu-item (click)="updateStatus('suspended')">
+            <mat-icon color="warn">block</mat-icon>
+            <span>Suspendre</span>
+          </button>
+        }
+        @if (shop()!.status === 'suspended') {
+          <button mat-menu-item (click)="updateStatus('approved')">
+            <mat-icon>check_circle</mat-icon>
+            <span>Réactiver</span>
+          </button>
+        }
+      </mat-menu>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-icon>inventory_2</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ shop()!.stats?.totalProducts || 0 }}</span>
+        <span class="stat-label">Produits</span>
+      </div>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-icon>shopping_cart</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ shop()!.stats?.totalOrders || 0 }}</span>
+        <span class="stat-label">Commandes</span>
+      </div>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-icon>euro</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ shop()!.stats?.totalRevenue || 0 | ariary }}</span>
+        <span class="stat-label">Chiffre d'affaires</span>
+      </div>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-icon>star</mat-icon>
+      <div class="stat-info">
+        <span class="stat-value">{{ shop()!.rating || '-' }}</span>
+        <span class="stat-label">Note moyenne</span>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group>
+    <!-- Info Tab -->
+    <mat-tab label="Informations">
+      <div class="tab-content">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Informations de la boutique</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Description</span>
+                <p class="info-value">{{ shop()!.description || 'Aucune description' }}</p>
+              </div>
+              <mat-divider></mat-divider>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Email</span>
+                  <span class="info-value">{{ shop()!.contact?.email || '-' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Téléphone</span>
+                  <span class="info-value">{{ shop()!.contact?.phone || '-' }}</span>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Emplacement</span>
+                  <span class="info-value">{{ shop()!.address?.location || '-' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Étage</span>
+                  <span class="info-value">{{ shop()!.address?.floor || '-' }}</span>
+                </div>
+              </div>
+              <mat-divider></mat-divider>
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">Commission</span>
+                  <span class="info-value">{{ shop()!.commission || 0 }}%</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Créée le</span>
+                  <span class="info-value">{{ shop()!.createdAt | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Propriétaire</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (owner()) {
+              <div class="owner-info">
+                <div class="owner-avatar">
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="owner-details">
+                  <span class="owner-name">{{ owner()!.firstName }} {{ owner()!.lastName }}</span>
+                  <span class="owner-email">{{ owner()!.email }}</span>
+                  <span class="owner-phone">{{ owner()!.phone || '-' }}</span>
+                </div>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Horaires d'ouverture</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="hours-list">
+              @for (hour of shop()!.hours || []; track hour.day) {
+                <div class="hour-item">
+                  <span class="day-name">{{ getDayName(hour.day) }}</span>
+                  @if (hour.isClosed) {
+                    <span class="closed">Fermé</span>
+                  } @else {
+                    <span class="time">{{ hour.open }} - {{ hour.close }}</span>
+                  }
+                </div>
+              }
+              @if (!shop()!.hours?.length) {
+                <p class="no-hours">Aucun horaire défini</p>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Products Tab -->
+    <mat-tab label="Produits">
+      <div class="tab-content">
+        <mat-card>
+          @if (products().length > 0) {
+            <table mat-table [dataSource]="products()">
+              <ng-container matColumnDef="image">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let product">
+                  <div class="product-image">
+                    @if (product.images?.[0]) {
+                      <img [src]="product.images[0]" [alt]="product.name">
+                    } @else {
+                      <mat-icon>image</mat-icon>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Produit</th>
+                <td mat-cell *matCellDef="let product">{{ product.name }}</td>
+              </ng-container>
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef>Prix</th>
+                <td mat-cell *matCellDef="let product">{{ product.basePrice | ariary }}</td>
+              </ng-container>
+              <ng-container matColumnDef="stock">
+                <th mat-header-cell *matHeaderCellDef>Stock</th>
+                <td mat-cell *matCellDef="let product">{{ product.stock }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Statut</th>
+                <td mat-cell *matCellDef="let product">
+                  <mat-chip [class]="product.isActive ? 'status-active' : 'status-inactive'">
+                    {{ product.isActive ? 'Actif' : 'Inactif' }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['image', 'name', 'price', 'stock', 'status']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['image', 'name', 'price', 'stock', 'status'];"></tr>
+            </table>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>inventory_2</mat-icon>
+              <p>Aucun produit</p>
+            </div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <!-- Orders Tab -->
+    <mat-tab label="Commandes">
+      <div class="tab-content">
+        <mat-card>
+          @if (orders().length > 0) {
+            <table mat-table [dataSource]="orders()">
+              <ng-container matColumnDef="orderNumber">
+                <th mat-header-cell *matHeaderCellDef>N°</th>
+                <td mat-cell *matCellDef="let order">{{ order.orderNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="customer">
+                <th mat-header-cell *matHeaderCellDef>Client</th>
+                <td mat-cell *matCellDef="let order">
+                  {{ order.userId?.firstName }} {{ order.userId?.lastName }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>Total</th>
+                <td mat-cell *matCellDef="let order">{{ order.total | ariary }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Statut</th>
+                <td mat-cell *matCellDef="let order">
+                  <mat-chip [class]="'order-status-' + order.status">
+                    {{ getOrderStatusLabel(order.status) }}
+                  </mat-chip>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let order">{{ order.createdAt | date:'dd/MM/yyyy' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['orderNumber', 'customer', 'total', 'status', 'date']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['orderNumber', 'customer', 'total', 'status', 'date'];"></tr>
+            </table>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>shopping_cart</mat-icon>
+              <p>Aucune commande</p>
+            </div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

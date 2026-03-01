@@ -1,0 +1,142 @@
+﻿    <div class="reservations-container">
+      <div class="page-header">
+        <div>
+          <h1>Mes Réservations</h1>
+          <p class="subtitle">Suivez vos réservations de produits</p>
+        </div>
+      </div>
+
+      <mat-tab-group (selectedTabChange)="onTabChange($event.index)">
+        <mat-tab label="Toutes"></mat-tab>
+        <mat-tab label="En attente"></mat-tab>
+        <mat-tab label="Confirmées"></mat-tab>
+        <mat-tab label="Prêtes"></mat-tab>
+        <mat-tab label="Historique"></mat-tab>
+      </mat-tab-group>
+
+      @if (isLoading()) {
+        <app-loading message="Chargement des réservations..."></app-loading>
+      } @else {
+        <div class="reservations-list">
+          @for (reservation of reservations(); track reservation._id) {
+            <mat-card class="reservation-card">
+              <div class="reservation-header">
+                <div class="header-left">
+                  <span class="reservation-number">{{ reservation.reservationNumber }}</span>
+                  <mat-chip [class]="'status-' + reservation.status">
+                    {{ getStatusLabel(reservation.status) }}
+                  </mat-chip>
+                </div>
+                <div class="header-right">
+                  <span class="type-badge" [class]="reservation.type">
+                    {{ reservation.type === 'pay_at_pickup' ? 'Payer au retrait' : 'Payé d\'avance' }}
+                  </span>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="reservation-content">
+                <!-- Shop Info -->
+                <div class="shop-info">
+                  <mat-icon>store</mat-icon>
+                  <span>{{ getShopName(reservation.shopId) }}</span>
+                </div>
+
+                <!-- Items -->
+                <div class="items-list">
+                  @for (item of reservation.items; track item.productId) {
+                    <div class="item">
+                      @if (item.image) {
+                        <img [src]="item.image" [alt]="item.name" class="item-image">
+                      } @else {
+                        <div class="item-placeholder">
+                          <mat-icon>inventory_2</mat-icon>
+                        </div>
+                      }
+                      <div class="item-details">
+                        <span class="item-name">{{ item.name }}</span>
+                        <span class="item-quantity">x{{ item.quantity }}</span>
+                      </div>
+                      <span class="item-price">{{ item.unitPrice * item.quantity | number:'1.2-2' }} Ar</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Pickup Info -->
+                <div class="pickup-info">
+                  <mat-icon>event</mat-icon>
+                  <div class="pickup-details">
+                    <span class="pickup-label">Retrait prévu</span>
+                    <span class="pickup-date">
+                      {{ reservation.pickupDetails?.scheduledDate | date:'EEEE d MMMM yyyy' }}
+                      @if (reservation.pickupDetails?.scheduledTimeSlot) {
+                        de {{ reservation.pickupDetails?.scheduledTimeSlot?.start }}
+                        à {{ reservation.pickupDetails?.scheduledTimeSlot?.end }}
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                @if (reservation.status === 'ready' && reservation.pickupDetails?.pickupCode) {
+                  <div class="pickup-code">
+                    <mat-icon>qr_code</mat-icon>
+                    <div>
+                      <span class="code-label">Code de retrait</span>
+                      <span class="code-value">{{ reservation.pickupDetails.pickupCode }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="reservation-footer">
+                <div class="total">
+                  <span class="total-label">Total</span>
+                  <span class="total-value">{{ reservation.total | number:'1.2-2' }} Ar</span>
+                </div>
+                <div class="actions">
+                  @if (reservation.canBeCancelled) {
+                    <button mat-stroked-button color="warn" (click)="cancelReservation(reservation)">
+                      <mat-icon>cancel</mat-icon>
+                      Annuler
+                    </button>
+                  }
+                  @if (reservation.status === 'ready') {
+                    <button mat-raised-button color="primary">
+                      <mat-icon>directions</mat-icon>
+                      Itinéraire
+                    </button>
+                  }
+                </div>
+              </div>
+            </mat-card>
+          }
+
+          @if (reservations().length === 0) {
+            <mat-card class="empty-card">
+              <div class="empty-state">
+                <mat-icon>event_busy</mat-icon>
+                <h3>Aucune réservation</h3>
+                <p>Vous n'avez pas encore de réservation.</p>
+                <a mat-raised-button color="primary" routerLink="/shops">
+                  <mat-icon>store</mat-icon>
+                  Parcourir les boutiques
+                </a>
+              </div>
+            </mat-card>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="pagination()?.total || 0"
+          [pageSize]="pagination()?.limit || 10"
+          [pageIndex]="(pagination()?.page || 1) - 1"
+          [pageSizeOptions]="[10, 20]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      }
+    </div>
+  

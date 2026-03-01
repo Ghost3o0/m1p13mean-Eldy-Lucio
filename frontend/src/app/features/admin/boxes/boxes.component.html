@@ -1,0 +1,133 @@
+<div class="boxes-container">
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <div class="filters-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Statut</mat-label>
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterBoxes()">
+          <mat-option value="">Tous</mat-option>
+          <mat-option value="available">Disponible</mat-option>
+          <mat-option value="occupied">Occupé</mat-option>
+          <mat-option value="unavailable">Indisponible</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Étage</mat-label>
+        <mat-select [(ngModel)]="selectedFloor" (selectionChange)="filterBoxes()">
+          <mat-option value="">Tous</mat-option>
+          @for (floor of floors; track floor) {
+            <mat-option [value]="floor">{{ floor }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Zone</mat-label>
+        <mat-select [(ngModel)]="selectedZone" (selectionChange)="filterBoxes()">
+          <mat-option value="">Toutes</mat-option>
+          @for (zone of zones; track zone) {
+            <mat-option [value]="zone">{{ zone }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="accent" (click)="openAddBoxDialog()">
+        <mat-icon>add</mat-icon>
+        Ajouter une box
+      </button>
+    </div>
+  </mat-card>
+
+  <!-- Boxes Grid -->
+  <div class="loading-container">
+    @if (isLoading()) {
+      <app-loading></app-loading>
+    }
+  </div>
+
+  @if (!isLoading()) {
+    @if (filteredBoxes().length > 0) {
+      <div class="boxes-grid">
+        @for (box of filteredBoxes(); track box._id) {
+          <mat-card class="box-card" [class.occupied]="box.status === 'occupied'" [class.unavailable]="box.status === 'unavailable'">
+            <div class="box-header">
+              <div class="box-info">
+                <h3>{{ box.code }}</h3>
+                <span class="box-location">{{ box.floor }} - {{ box.zone }}</span>
+              </div>
+              <mat-chip-set>
+                <mat-chip [class]="'status-' + box.status">
+                  {{ getStatusLabel(box.status) }}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="box-details">
+              <div class="detail-row">
+                <span class="label">Dimensions</span>
+                <span>{{ box.dimensions.width }}m × {{ box.dimensions.depth }}m × {{ box.dimensions.height }}m</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Surface</span>
+                <span>{{ (box.dimensions.width * box.dimensions.depth).toFixed(2) }}m²</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Loyer mensuel</span>
+                <span>{{ box.monthlyRent | ariary }}</span>
+              </div>
+
+              @if (box.status === 'occupied') {
+                <div class="occupant-info">
+                  <span class="label">Occupant</span>
+                  <span>{{ box.assignedShop?.name }}</span>
+                </div>
+              }
+
+              @if (box.equipment?.length > 0) {
+                <div class="equipment-list">
+                  <span class="label">Équipements</span>
+                  <div class="equipment-tags">
+                    @for (item of box.equipment; track item) {
+                      <mat-chip size="small">
+                        <mat-icon>{{ getEquipmentIcon(item) }}</mat-icon>
+                        {{ item }}
+                      </mat-chip>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="box-actions">
+              @if (box.status === 'available') {
+                <button mat-stroked-button size="small" (click)="assignShop(box)">
+                  <mat-icon>person_add</mat-icon>
+                  Assigner
+                </button>
+              } @else if (box.status === 'occupied') {
+                <button mat-stroked-button size="small" (click)="unassignShop(box)">
+                  <mat-icon>person_remove</mat-icon>
+                  Libérer
+                </button>
+              }
+              <button mat-icon-button (click)="editBox(box)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteBox(box._id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-card>
+        }
+      </div>
+    } @else {
+      <mat-card class="empty-state">
+        <mat-icon>inventory_2</mat-icon>
+        <p>Aucune box trouvée</p>
+      </mat-card>
+    }
+  }
+</div>

@@ -1,0 +1,294 @@
+﻿    <div class="client-layout" [class.dark-mode]="themeService.isDarkMode()">
+      <!-- Header -->
+      <header class="client-header" [class.scrolled]="isScrolled()">
+        <div class="header-content">
+          <!-- Logo -->
+          <a routerLink="/" class="logo">
+            <img src="/assets/logo.png" alt="Bazar'Be" class="logo-img" onerror="this.style.display='none'">
+            <span class="logo-text">Bazar'Be</span>
+          </a>
+
+          <!-- Categories Dropdown -->
+          <button class="categories-btn" [matMenuTriggerFor]="categoriesMenu">
+            <mat-icon>menu</mat-icon>
+            <span>Catégories</span>
+            <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+          </button>
+
+          <mat-menu #categoriesMenu="matMenu" class="categories-menu">
+            <a mat-menu-item routerLink="/catalog" class="category-item all-categories">
+              <mat-icon>apps</mat-icon>
+              <span>Toutes les catégories</span>
+            </a>
+            <mat-divider></mat-divider>
+            @for (category of categories(); track category._id) {
+              <a mat-menu-item
+                 [routerLink]="['/catalog']"
+                 [queryParams]="{category: category.slug}"
+                 class="category-item">
+                <mat-icon>{{ category.icon || 'folder' }}</mat-icon>
+                <span>{{ category.name }}</span>
+              </a>
+            }
+          </mat-menu>
+
+          <!-- Search Bar -->
+          <div class="search-bar">
+            <mat-icon>search</mat-icon>
+            <input type="text"
+                   placeholder="Rechercher des produits, boutiques..."
+                   [(ngModel)]="searchQuery"
+                   (keyup.enter)="search()" />
+            @if (searchQuery()) {
+              <button class="clear-search" (click)="clearSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </div>
+
+          <!-- Navigation -->
+          <nav class="nav-links">
+            <a routerLink="/catalog" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+              <mat-icon>grid_view</mat-icon>
+              <span>Catalogue</span>
+            </a>
+            <a routerLink="/catalog" [queryParams]="{promo: true}" class="promo-link">
+              <mat-icon>local_fire_department</mat-icon>
+              <span>Promos</span>
+            </a>
+          </nav>
+
+          <!-- Actions -->
+          <div class="actions">
+            <!-- Theme Toggle -->
+            <button class="action-btn theme-btn"
+                    (click)="themeService.toggleTheme()"
+                    [matTooltip]="themeService.isDarkMode() ? 'Mode clair' : 'Mode sombre'">
+              <div class="theme-toggle-icon" [class.dark]="themeService.isDarkMode()">
+                @if (themeService.isDarkMode()) {
+                  <mat-icon>light_mode</mat-icon>
+                } @else {
+                  <mat-icon>dark_mode</mat-icon>
+                }
+              </div>
+            </button>
+
+            <!-- Cart -->
+            <a routerLink="/cart" class="action-btn cart-btn" matTooltip="Mon panier">
+              <mat-icon [matBadge]="cartCount()" matBadgeColor="accent" [matBadgeHidden]="cartCount() === 0" matBadgeSize="small">
+                shopping_cart
+              </mat-icon>
+            </a>
+
+            @if (authService.isAuthenticated()) {
+              <!-- Notifications -->
+              <app-notifications></app-notifications>
+
+              <!-- Favorites -->
+              <a routerLink="/favorites" class="action-btn">
+                <mat-icon>favorite_border</mat-icon>
+              </a>
+
+              <!-- User Menu -->
+              <button class="user-btn" [matMenuTriggerFor]="userMenu">
+                <div class="user-avatar">{{ getUserInitials() }}</div>
+                <mat-icon class="dropdown-icon">expand_more</mat-icon>
+              </button>
+
+              <mat-menu #userMenu="matMenu" class="user-menu">
+                <div class="menu-header">
+                  <div class="menu-avatar">{{ getUserInitials() }}</div>
+                  <div class="menu-user-info">
+                    <span class="menu-user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span>
+                    <span class="menu-user-email">{{ currentUser()?.email }}</span>
+                  </div>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                @if (authService.isAdmin()) {
+                  <a mat-menu-item routerLink="/admin/dashboard" class="menu-item admin-item">
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    <span>Administration</span>
+                  </a>
+                }
+
+                @if (authService.isShopOwner()) {
+                  <a mat-menu-item routerLink="/shop-manager/dashboard" class="menu-item shop-item">
+                    <mat-icon>store</mat-icon>
+                    <span>Gestion Boutique</span>
+                  </a>
+                }
+
+                @if (!authService.isShopOwner() && !authService.isAdmin()) {
+                  <a mat-menu-item routerLink="/become-vendor" class="menu-item vendor-item">
+                    <mat-icon>storefront</mat-icon>
+                    <span>Devenir vendeur</span>
+                  </a>
+                }
+
+                <a mat-menu-item routerLink="/orders" class="menu-item">
+                  <mat-icon>receipt_long</mat-icon>
+                  <span>Mes commandes</span>
+                </a>
+
+                <a mat-menu-item routerLink="/favorites" class="menu-item">
+                  <mat-icon>favorite</mat-icon>
+                  <span>Mes favoris</span>
+                </a>
+
+                <a mat-menu-item routerLink="/reservations" class="menu-item">
+                  <mat-icon>event</mat-icon>
+                  <span>Mes réservations</span>
+                </a>
+
+                <a mat-menu-item routerLink="/profile" class="menu-item">
+                  <mat-icon>settings</mat-icon>
+                  <span>Paramètres</span>
+                </a>
+
+                <mat-divider></mat-divider>
+
+                <button mat-menu-item (click)="logout()" class="menu-item logout-item">
+                  <mat-icon>logout</mat-icon>
+                  <span>Déconnexion</span>
+                </button>
+              </mat-menu>
+            } @else {
+              <a routerLink="/auth/login" class="login-btn">Connexion</a>
+              <a routerLink="/auth/register" class="signup-btn">
+                <span>Inscription</span>
+                <mat-icon>arrow_forward</mat-icon>
+              </a>
+            }
+          </div>
+
+          <!-- Mobile Menu Toggle -->
+          <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+            <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        @if (mobileMenuOpen()) {
+          <div class="mobile-menu">
+            <div class="mobile-search">
+              <mat-icon>search</mat-icon>
+              <input type="text"
+                     placeholder="Rechercher..."
+                     [(ngModel)]="searchQuery"
+                     (keyup.enter)="search(); closeMobileMenu()" />
+            </div>
+
+            <nav class="mobile-nav">
+              <!-- Theme Toggle -->
+              <button class="mobile-theme-toggle" (click)="themeService.toggleTheme()">
+                @if (themeService.isDarkMode()) {
+                  <mat-icon>light_mode</mat-icon>
+                  <span>Mode clair</span>
+                } @else {
+                  <mat-icon>dark_mode</mat-icon>
+                  <span>Mode sombre</span>
+                }
+              </button>
+
+              <mat-divider></mat-divider>
+
+              <a routerLink="/catalog" (click)="closeMobileMenu()">
+                <mat-icon>grid_view</mat-icon>
+                Catalogue
+              </a>
+
+              <!-- Categories submenu -->
+              <div class="mobile-categories">
+                <span class="mobile-category-title">Catégories</span>
+                @for (category of categories(); track category._id) {
+                  <a [routerLink]="['/catalog']"
+                     [queryParams]="{category: category.slug}"
+                     (click)="closeMobileMenu()"
+                     class="mobile-category-item">
+                    <mat-icon>{{ category.icon || 'folder' }}</mat-icon>
+                    {{ category.name }}
+                  </a>
+                }
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <a routerLink="/catalog" [queryParams]="{promo: true}" (click)="closeMobileMenu()" class="mobile-promo">
+                <mat-icon>local_fire_department</mat-icon>
+                Promotions
+              </a>
+              <a routerLink="/cart" (click)="closeMobileMenu()">
+                <mat-icon>shopping_cart</mat-icon>
+                Panier ({{ cartCount() }})
+              </a>
+
+              @if (authService.isAuthenticated()) {
+                <mat-divider></mat-divider>
+                <a routerLink="/orders" (click)="closeMobileMenu()">
+                  <mat-icon>receipt_long</mat-icon>
+                  Mes commandes
+                </a>
+                <a routerLink="/favorites" (click)="closeMobileMenu()">
+                  <mat-icon>favorite</mat-icon>
+                  Mes favoris
+                </a>
+                <a routerLink="/profile" (click)="closeMobileMenu()">
+                  <mat-icon>person</mat-icon>
+                  Mon profil
+                </a>
+                @if (authService.isAdmin()) {
+                  <a routerLink="/admin/dashboard" (click)="closeMobileMenu()" class="mobile-admin">
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    Administration
+                  </a>
+                }
+                @if (authService.isShopOwner()) {
+                  <a routerLink="/shop-manager/dashboard" (click)="closeMobileMenu()" class="mobile-shop">
+                    <mat-icon>store</mat-icon>
+                    Ma boutique
+                  </a>
+                }
+                <button (click)="logout(); closeMobileMenu()" class="mobile-logout">
+                  <mat-icon>logout</mat-icon>
+                  Déconnexion
+                </button>
+              } @else {
+                <mat-divider></mat-divider>
+                <a routerLink="/auth/login" class="mobile-login" (click)="closeMobileMenu()">Connexion</a>
+                <a routerLink="/auth/register" class="mobile-signup" (click)="closeMobileMenu()">Inscription</a>
+              }
+            </nav>
+          </div>
+        }
+      </header>
+
+      <!-- Main Content -->
+      <main class="client-content">
+        <router-outlet></router-outlet>
+      </main>
+
+      <!-- Footer -->
+      <footer class="client-footer">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Bazar'Be</h4>
+            <p>Votre centre commercial en ligne</p>
+          </div>
+          <div class="footer-section">
+            <h4>Liens utiles</h4>
+            <a routerLink="/catalog">Catalogue</a>
+            <a routerLink="/become-vendor">Devenir vendeur</a>
+          </div>
+          <div class="footer-section">
+            <h4>Contact</h4>
+            <p>support&#64;bazarbe.mg</p>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024 Bazar'Be. Tous droits réservés.</p>
+        </div>
+      </footer>
+    </div>
+  

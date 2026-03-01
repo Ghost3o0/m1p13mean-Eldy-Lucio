@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>
+  <mat-icon>store</mat-icon>
+  Promouvoir en vendeur
+</h2>
+
+<mat-dialog-content>
+  <div class="user-info">
+    <p><strong>Utilisateur:</strong> {{ data.user.firstName }} {{ data.user.lastName }}</p>
+    <p><strong>Email:</strong> {{ data.user.email }}</p>
+  </div>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Nom de la boutique</mat-label>
+    <input matInput [(ngModel)]="shopName" [placeholder]="'Boutique de ' + data.user.firstName">
+    <mat-hint>Laissez vide pour utiliser le nom par défaut</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Catégorie</mat-label>
+    <mat-select [(ngModel)]="categoryId">
+      <mat-option [value]="null">Aucune catégorie</mat-option>
+      @for (cat of categories(); track cat._id) {
+        <mat-option [value]="cat._id">{{ cat.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Assigner un box (optionnel)</mat-label>
+    <mat-select [(ngModel)]="boxId">
+      <mat-option [value]="null">Pas de box pour l'instant</mat-option>
+      @for (box of availableBoxes(); track box._id) {
+        <mat-option [value]="box._id">
+          {{ box.name }}
+          @if (box.location?.floor) {
+            - Étage {{ box.location.floor }}
+          }
+          @if (box.currentRent?.amount) {
+            ({{ box.currentRent.amount | number }} Ar/mois)
+          }
+        </mat-option>
+      }
+    </mat-select>
+    <mat-hint>Sélectionnez un box disponible à assigner immédiatement</mat-hint>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-raised-button color="primary" (click)="confirm()">
+    <mat-icon>check</mat-icon>
+    Promouvoir
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,179 @@
+<div class="categories-container">
+  <div class="categories-header">
+    <h1>Gestion des catégories</h1>
+    <button mat-raised-button color="primary" (click)="openForm()">
+      <mat-icon>add</mat-icon>
+      Ajouter une catégorie
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading message="Chargement des catégories..."></app-loading>
+  }
+
+  @if (!isLoading()) {
+    <!-- Category Form -->
+    @if (showForm()) {
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>{{ editingCategory() ? 'Modifier' : 'Nouvelle' }} catégorie</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="name">
+              @if (categoryForm.get('name')?.hasError('required') && categoryForm.get('name')?.touched) {
+                <mat-error>Le nom est requis</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="2"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Catégorie parente</mat-label>
+              <mat-select formControlName="parentId">
+                <mat-option [value]="null">Aucune (catégorie principale)</mat-option>
+                @for (category of getParentCategoryOptions(); track category._id) {
+                  <mat-option [value]="category._id">{{ category.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <div class="image-upload">
+              <label>Image de la catégorie</label>
+              <div class="image-preview" [class.has-image]="imagePreview()">
+                @if (imagePreview()) {
+                  <img [src]="imagePreview()" alt="Category image">
+                } @else {
+                  <mat-icon>image</mat-icon>
+                }
+                <label class="upload-overlay">
+                  <input type="file" accept="image/*" (change)="onImageSelect($event)" hidden>
+                  <mat-icon>camera_alt</mat-icon>
+                </label>
+              </div>
+            </div>
+
+            <mat-slide-toggle formControlName="isActive" color="primary">
+              Catégorie active
+            </mat-slide-toggle>
+
+            <mat-slide-toggle formControlName="isFeatured" color="accent">
+              Catégorie en vedette
+            </mat-slide-toggle>
+
+            <div class="form-actions">
+              <button mat-button type="button" (click)="closeForm()">Annuler</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="categoryForm.invalid || isSaving()">
+                @if (isSaving()) {
+                  <mat-spinner diameter="20"></mat-spinner>
+                } @else {
+                  {{ editingCategory() ? 'Enregistrer' : 'Créer' }}
+                }
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Categories Table -->
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="categories()">
+        <!-- Image -->
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let category">
+            <div class="category-image">
+              @if (category.image) {
+                <img [src]="category.image" [alt]="category.name">
+              } @else {
+                <mat-icon>category</mat-icon>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Name -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Nom</th>
+          <td mat-cell *matCellDef="let category">
+            <div class="category-name-cell">
+              @if (category.parentId) {
+                <span class="parent-indicator">↳</span>
+              }
+              <span class="name">{{ category.name }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Parent -->
+        <ng-container matColumnDef="parent">
+          <th mat-header-cell *matHeaderCellDef>Parent</th>
+          <td mat-cell *matCellDef="let category">
+            {{ getParentName(category.parentId) }}
+          </td>
+        </ng-container>
+
+        <!-- Products Count -->
+        <ng-container matColumnDef="products">
+          <th mat-header-cell *matHeaderCellDef>Produits</th>
+          <td mat-cell *matCellDef="let category">
+            {{ category.productCount || 0 }}
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Statut</th>
+          <td mat-cell *matCellDef="let category">
+            <mat-slide-toggle [checked]="category.isActive" (change)="toggleActive(category)" color="primary">
+            </mat-slide-toggle>
+          </td>
+        </ng-container>
+
+        <!-- Featured -->
+        <ng-container matColumnDef="featured">
+          <th mat-header-cell *matHeaderCellDef>Vedette</th>
+          <td mat-cell *matCellDef="let category">
+            <mat-icon [class.featured]="category.isFeatured">
+              {{ category.isFeatured ? 'star' : 'star_border' }}
+            </mat-icon>
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let category">
+            <button mat-icon-button (click)="editCategory(category)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteCategory(category)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      @if (categories().length === 0) {
+        <div class="empty-state">
+          <mat-icon>category</mat-icon>
+          <h3>Aucune catégorie</h3>
+          <p>Créez des catégories pour organiser vos produits.</p>
+          <button mat-raised-button color="primary" (click)="openForm()">
+            <mat-icon>add</mat-icon>
+            Ajouter une catégorie
+          </button>
+        </div>
+      }
+    </mat-card>
+  }
+</div>

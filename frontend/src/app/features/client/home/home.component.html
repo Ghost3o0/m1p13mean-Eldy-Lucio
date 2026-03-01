@@ -1,0 +1,238 @@
+﻿    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <mat-icon>local_offer</mat-icon>
+          <span>Offres exclusives</span>
+        </div>
+        <h1 class="hero-title">
+          Découvrez le meilleur du
+          <span class="gradient-text">shopping</span>
+        </h1>
+        <p class="hero-subtitle">
+          Plus de 100 boutiques, des milliers de produits et des offres exclusives vous attendent
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/catalog" class="btn-primary">
+            <mat-icon>explore</mat-icon>
+            Explorer les boutiques
+          </a>
+          <a routerLink="/catalog" [queryParams]="{featured: true}" class="btn-secondary">
+            <mat-icon>auto_awesome</mat-icon>
+            Voir les tendances
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-number">100+</span>
+            <span class="stat-label">Boutiques</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">10K+</span>
+            <span class="stat-label">Produits</span>
+          </div>
+          <div class="stat">
+            <span class="stat-number">50K+</span>
+            <span class="stat-label">Clients satisfaits</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-decoration">
+        <div class="floating-card card-1">
+          <mat-icon>shopping_bag</mat-icon>
+        </div>
+        <div class="floating-card card-2">
+          <mat-icon>favorite</mat-icon>
+        </div>
+        <div class="floating-card card-3">
+          <mat-icon>star</mat-icon>
+        </div>
+      </div>
+    </section>
+
+    <div class="main-content">
+      <!-- Categories Section -->
+      <section class="section categories-section">
+        <div class="section-header">
+          <div class="section-title-group">
+            <h2>Explorez par catégorie</h2>
+            <p class="section-subtitle">Trouvez exactement ce que vous cherchez</p>
+          </div>
+          <a routerLink="/catalog" class="view-all-link">
+            Voir tout
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+        <div class="categories-grid">
+          @for (category of categories(); track category._id) {
+            <a [routerLink]="['/catalog']" [queryParams]="{category: category._id}" class="category-card">
+              <div class="category-icon">
+                <mat-icon>{{ getCategoryIcon(category.name) }}</mat-icon>
+              </div>
+              <span class="category-name">{{ category.name }}</span>
+              <mat-icon class="category-arrow">arrow_forward</mat-icon>
+            </a>
+          }
+        </div>
+      </section>
+
+      <!-- Promo Banner -->
+      <section class="promo-banner">
+        <div class="promo-content">
+          <div class="promo-text">
+            <span class="promo-label">Offre limitée</span>
+            <h3>Jusqu'à -50% sur une sélection d'articles</h3>
+            <p>Profitez de nos offres exceptionnelles avant qu'il ne soit trop tard !</p>
+          </div>
+          <a routerLink="/catalog" [queryParams]="{promo: true}" class="promo-btn">
+            En profiter
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+        <div class="promo-decoration">
+          <mat-icon>percent</mat-icon>
+        </div>
+      </section>
+
+      <!-- Featured Products -->
+      <section class="section products-section">
+        <div class="section-header">
+          <div class="section-title-group">
+            <h2>Produits en vedette</h2>
+            <p class="section-subtitle">Les coups de coeur de nos clients</p>
+          </div>
+          <a routerLink="/catalog" [queryParams]="{featured: true}" class="view-all-link">
+            Voir tout
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+        @if (isLoadingProducts()) {
+          <app-loading message="Chargement des produits..."></app-loading>
+        } @else {
+          <div class="products-grid">
+            @for (product of featuredProducts(); track product._id) {
+              <div class="product-card" [routerLink]="['/product', product._id]">
+                <div class="product-image-container">
+                  <img [src]="product.images[0] || '/assets/placeholder.png'" [alt]="product.name" class="product-image">
+                  @if (product.compareAtPrice) {
+                    <span class="product-badge sale">Promo</span>
+                  }
+                  @if (product.isFeatured) {
+                    <span class="product-badge featured">Vedette</span>
+                  }
+                  <div class="product-actions">
+                    <button class="action-btn" title="Ajouter aux favoris">
+                      <mat-icon>favorite_border</mat-icon>
+                    </button>
+                    <button class="action-btn" title="Aperçu rapide">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                <div class="product-info">
+                  @if (getShopName(product.shopId)) {
+                    <span class="product-shop">{{ getShopName(product.shopId) }}</span>
+                  }
+                  <h3 class="product-name">{{ product.name }}</h3>
+                  <div class="product-price-row">
+                    <span class="product-price">{{ product.basePrice | ariary:'symbol':'1.2-2':'fr' }}</span>
+                    @if (product.compareAtPrice) {
+                      <span class="product-old-price">{{ product.compareAtPrice | ariary:'symbol':'1.2-2':'fr' }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-state">
+                <mat-icon>inventory_2</mat-icon>
+                <p>Aucun produit en vedette pour le moment</p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Featured Shops -->
+      <section class="section shops-section">
+        <div class="section-header">
+          <div class="section-title-group">
+            <h2>Boutiques populaires</h2>
+            <p class="section-subtitle">Découvrez nos partenaires de confiance</p>
+          </div>
+          <a routerLink="/catalog" class="view-all-link">
+            Voir toutes les boutiques
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+        <div class="shops-grid">
+          @for (shop of featuredShops(); track shop._id) {
+            <div class="shop-card" [routerLink]="['/shop', shop._id]">
+              <div class="shop-header">
+                <div class="shop-logo">
+                  @if (shop.logo) {
+                    <img [src]="shop.logo" [alt]="shop.name">
+                  } @else {
+                    <mat-icon>store</mat-icon>
+                  }
+                </div>
+                @if (shop.rating?.average) {
+                  <div class="shop-rating">
+                    <mat-icon>star</mat-icon>
+                    <span>{{ shop.rating!.average!.toFixed(1) }}</span>
+                  </div>
+                }
+              </div>
+              <div class="shop-info">
+                <h3 class="shop-name">{{ shop.name }}</h3>
+                <p class="shop-description">{{ shop.shortDescription || shop.description | slice:0:80 }}...</p>
+              </div>
+              <div class="shop-footer">
+                <span class="shop-cta">
+                  Visiter la boutique
+                  <mat-icon>arrow_forward</mat-icon>
+                </span>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <mat-icon>storefront</mat-icon>
+              <p>Aucune boutique disponible</p>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features-section">
+        <div class="feature">
+          <div class="feature-icon">
+            <mat-icon>local_shipping</mat-icon>
+          </div>
+          <h4>Livraison rapide</h4>
+          <p>Recevez vos commandes en 24-48h</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <mat-icon>verified_user</mat-icon>
+          </div>
+          <h4>Paiement sécurisé</h4>
+          <p>Transactions 100% sécurisées</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <mat-icon>support_agent</mat-icon>
+          </div>
+          <h4>Support 24/7</h4>
+          <p>Une équipe à votre écoute</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">
+            <mat-icon>autorenew</mat-icon>
+          </div>
+          <h4>Retours faciles</h4>
+          <p>30 jours pour changer d'avis</p>
+        </div>
+      </section>
+    </div>
+  

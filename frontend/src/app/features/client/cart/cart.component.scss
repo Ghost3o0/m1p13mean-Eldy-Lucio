@@ -1,0 +1,364 @@
+﻿    .cart-container {
+      padding: 24px 16px;
+      min-height: calc(100vh - 64px - 200px);
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 24px;
+    }
+
+    .login-prompt,
+    .empty-cart {
+      text-align: center;
+      padding: 80px 24px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+
+      mat-icon {
+        font-size: 80px;
+        width: 80px;
+        height: 80px;
+        color: var(--gray-300);
+        margin-bottom: 16px;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        color: var(--text-primary);
+      }
+
+      p {
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+      }
+    }
+
+    .cart-content {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .cart-items {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .shop-group {
+      padding: 16px;
+    }
+
+    .shop-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 16px;
+
+      mat-icon {
+        color: var(--primary);
+      }
+
+      .shop-name {
+        font-weight: 500;
+        font-size: 1.1rem;
+      }
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+
+      &:last-of-type {
+        border-bottom: none;
+      }
+    }
+
+    .item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .item-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .item-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        text-decoration: none;
+
+        &:hover {
+          color: var(--primary);
+        }
+      }
+
+      .item-variation {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .item-price {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+    }
+
+    .item-quantity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px;
+
+      span {
+        min-width: 32px;
+        text-align: center;
+      }
+    }
+
+    .item-total {
+      font-weight: 600;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .promo-section {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+
+      .promo-input {
+        flex: 1;
+      }
+    }
+
+    .shop-subtotal {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 16px;
+      margin-top: 16px;
+      border-top: 1px solid var(--border-color);
+      font-weight: 500;
+    }
+
+    .order-summary {
+      position: sticky;
+      top: 88px;
+    }
+
+    mat-card-header {
+      margin-bottom: 16px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+
+      &.discount {
+        color: var(--success);
+      }
+
+      &.total {
+        font-size: 1.25rem;
+        font-weight: 600;
+        padding-top: 16px;
+      }
+    }
+
+    mat-divider {
+      margin: 8px 0;
+    }
+
+    mat-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      height: 48px;
+      font-size: 1rem;
+    }
+
+    .benefits {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .benefit {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--bg-primary);
+        border-radius: 8px;
+
+        mat-icon {
+          color: var(--primary);
+        }
+
+        div {
+          display: flex;
+          flex-direction: column;
+
+          strong {
+            font-size: 0.9rem;
+          }
+
+          span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+          }
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .cart-content {
+        grid-template-columns: 1fr;
+      }
+
+      .order-summary {
+        position: static;
+      }
+
+      .cart-item {
+        flex-wrap: wrap;
+
+        .item-image {
+          width: 60px;
+          height: 60px;
+        }
+
+        .item-total {
+          width: 100%;
+          text-align: left;
+          padding-left: 76px;
+        }
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .promo-section {
+        flex-direction: column;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+
+    @media (max-width: 480px) {
+      .cart-container {
+        padding: 16px 12px;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        margin-bottom: 16px;
+      }
+
+      .login-prompt,
+      .empty-cart {
+        padding: 48px 16px;
+
+        mat-icon {
+          font-size: 64px;
+          width: 64px;
+          height: 64px;
+        }
+
+        h2 {
+          font-size: 1.25rem;
+        }
+      }
+
+      .shop-group {
+        padding: 12px;
+      }
+
+      .cart-item {
+        gap: 12px;
+        padding: 12px 0;
+
+        .item-image {
+          width: 50px;
+          height: 50px;
+        }
+
+        .item-total {
+          padding-left: 62px;
+          font-size: 0.9rem;
+        }
+      }
+
+      .item-details {
+        .item-name {
+          font-size: 0.9rem;
+        }
+
+        .item-variation,
+        .item-price {
+          font-size: 0.8rem;
+        }
+      }
+
+      .item-quantity {
+        span {
+          min-width: 24px;
+          font-size: 0.9rem;
+        }
+      }
+
+      .benefits {
+        .benefit {
+          padding: 10px;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+
+          strong {
+            font-size: 0.85rem;
+          }
+
+          span {
+            font-size: 0.75rem;
+          }
+        }
+      }
+
+      .summary-row.total {
+        font-size: 1.1rem;
+      }
+
+      .checkout-btn {
+        height: 44px;
+        font-size: 0.95rem;
+      }
+    }
+  
