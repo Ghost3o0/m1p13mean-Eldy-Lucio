@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, signal } from '@angular/core';
+﻿import { Component, Inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -24,155 +24,8 @@ import { SellerService } from '@shared/services/seller.service';
     MatIconModule,
     MatDividerModule
   ],
-  template: `
-    <h2 mat-dialog-title>{{ data.seller ? 'Modifier le vendeur' : 'Nouveau vendeur' }}</h2>
-    <mat-dialog-content>
-      <form class="seller-form">
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Prénom</mat-label>
-            <input matInput [(ngModel)]="formData.firstName" name="firstName" required>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Nom</mat-label>
-            <input matInput [(ngModel)]="formData.lastName" name="lastName" required>
-          </mat-form-field>
-        </div>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email</mat-label>
-          <input matInput [(ngModel)]="formData.email" name="email" type="email" required>
-        </mat-form-field>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>Téléphone</mat-label>
-            <input matInput [(ngModel)]="formData.phone" name="phone">
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>ID Employé</mat-label>
-            <input matInput [(ngModel)]="formData.employeeId" name="employeeId" placeholder="EMP-001">
-          </mat-form-field>
-        </div>
-
-        <mat-divider></mat-divider>
-
-        <div class="permissions-section">
-          <h3>Permissions</h3>
-          <div class="permissions-grid">
-            <mat-checkbox [(ngModel)]="formData.permissions.sales" name="permSales">
-              <mat-icon>point_of_sale</mat-icon>
-              Ventes
-            </mat-checkbox>
-            <mat-checkbox [(ngModel)]="formData.permissions.stock" name="permStock">
-              <mat-icon>inventory</mat-icon>
-              Stock
-            </mat-checkbox>
-            <mat-checkbox [(ngModel)]="formData.permissions.cashRegister" name="permCash">
-              <mat-icon>calculate</mat-icon>
-              Caisse
-            </mat-checkbox>
-            <mat-checkbox [(ngModel)]="formData.permissions.orders" name="permOrders">
-              <mat-icon>shopping_cart</mat-icon>
-              Commandes
-            </mat-checkbox>
-            <mat-checkbox [(ngModel)]="formData.permissions.customers" name="permCustomers">
-              <mat-icon>people</mat-icon>
-              Clients
-            </mat-checkbox>
-            <mat-checkbox [(ngModel)]="formData.permissions.reports" name="permReports">
-              <mat-icon>analytics</mat-icon>
-              Rapports
-            </mat-checkbox>
-          </div>
-        </div>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button mat-dialog-close>Annuler</button>
-      <button mat-raised-button color="primary" (click)="save()"
-              [disabled]="isSaving() || !formData.firstName || !formData.lastName || !formData.email">
-        @if (isSaving()) {
-          Enregistrement...
-        } @else {
-          {{ data.seller ? 'Modifier' : 'Créer' }}
-        }
-      </button>
-    </mat-dialog-actions>
-  `,
-  styles: [`
-    mat-dialog-content {
-      min-width: 400px;
-    }
-
-    .seller-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 16px 0;
-    }
-
-    .form-row {
-      display: flex;
-      gap: 16px;
-
-      mat-form-field {
-        flex: 1;
-      }
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    mat-divider {
-      margin: 8px 0;
-    }
-
-    .permissions-section {
-      padding: 16px 0;
-
-      h3 {
-        margin: 0 0 16px 0;
-        font-size: 1rem;
-        color: var(--text-secondary);
-      }
-    }
-
-    .permissions-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-
-      mat-checkbox {
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-          margin-right: 8px;
-          vertical-align: middle;
-          color: var(--text-secondary);
-        }
-      }
-    }
-
-    @media (max-width: 600px) {
-      mat-dialog-content {
-        min-width: auto;
-      }
-
-      .form-row {
-        flex-direction: column;
-      }
-
-      .permissions-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  `]
-})
+  templateUrl: './seller-form-dialog.component.html',
+  styleUrls: ['./seller-form-dialog.component.scss'],})
 export class SellerFormDialogComponent implements OnInit {
   isSaving = signal(false);
 
@@ -246,3 +99,5 @@ export class SellerFormDialogComponent implements OnInit {
     });
   }
 }
+
+

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+﻿import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -28,182 +28,8 @@ import { DeliveryZone } from '@shared/services/delivery.service';
     MatIconModule,
     MatCardModule
   ],
-  template: `
-    <div class="dialog-container">
-      <h2 mat-dialog-title>{{ isEditing() ? 'Modifier' : 'Créer' }} une zone de livraison</h2>
-
-      <form [formGroup]="zoneForm" (ngSubmit)="saveZone()">
-        <mat-dialog-content>
-          <!-- Zone Name -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nom de la zone</mat-label>
-            <input matInput formControlName="name" placeholder="Ex: Zone Centre-ville">
-            @if (zoneForm.get('name')?.hasError('required') && zoneForm.get('name')?.touched) {
-              <mat-error>Le nom est requis</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- Zone Type -->
-          <div class="zone-type-section">
-            <label>Type de zone:</label>
-            <mat-radio-group formControlName="type" (change)="onZoneTypeChange()">
-              <mat-radio-button value="postal_codes">Codes postaux</mat-radio-button>
-              <mat-radio-button value="cities">Villes</mat-radio-button>
-              <mat-radio-button value="radius">Rayon (km)</mat-radio-button>
-            </mat-radio-group>
-          </div>
-
-          <!-- Postal Codes -->
-          @if (zoneForm.get('type')?.value === 'postal_codes') {
-            <div class="postal-codes-section">
-              <label>Codes postaux (un par ligne)</label>
-              <textarea
-                matInput
-                formControlName="postalCodesInput"
-                rows="5"
-                placeholder="75001&#10;75002&#10;75003"
-                class="full-width">
-              </textarea>
-              <mat-hint>Séparez chaque code postal par une nouvelle ligne</mat-hint>
-            </div>
-          }
-
-          <!-- Cities -->
-          @if (zoneForm.get('type')?.value === 'cities') {
-            <div class="cities-section">
-              <label>Villes (un par ligne)</label>
-              <textarea
-                matInput
-                formControlName="citiesInput"
-                rows="5"
-                placeholder="Paris&#10;Lyon&#10;Marseille"
-                class="full-width">
-              </textarea>
-              <mat-hint>Séparez chaque ville par une nouvelle ligne</mat-hint>
-            </div>
-          }
-
-          <!-- Radius -->
-          @if (zoneForm.get('type')?.value === 'radius') {
-            <div class="radius-section">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Latitude du centre</mat-label>
-                <input matInput type="number" formControlName="centerLat" step="0.0001">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Longitude du centre</mat-label>
-                <input matInput type="number" formControlName="centerLng" step="0.0001">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Rayon (km)</mat-label>
-                <input matInput type="number" formControlName="radiusKm" step="0.1">
-              </mat-form-field>
-            </div>
-          }
-
-          <!-- Delivery Fee -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Frais de livraison (€)</mat-label>
-            <input matInput type="number" formControlName="deliveryFee" step="0.01">
-          </mat-form-field>
-
-          <!-- Min Order Amount -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Commande minimum (€)</mat-label>
-            <input matInput type="number" formControlName="minOrderAmount" step="0.01">
-            <mat-hint>Laisser vide s'il n'y a pas de minimum</mat-hint>
-          </mat-form-field>
-
-          <!-- Estimated Time -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Délai estimé</mat-label>
-            <input matInput formControlName="estimatedTime" placeholder="30-45 min">
-          </mat-form-field>
-
-          <!-- Active -->
-          <div class="active-section">
-            <mat-slide-toggle formControlName="isActive">
-              Zone active
-            </mat-slide-toggle>
-          </div>
-        </mat-dialog-content>
-
-        <mat-dialog-actions align="end">
-          <button mat-button (click)="onCancel()">Annuler</button>
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="zoneForm.invalid || isSaving()">
-            {{ isEditing() ? 'Modifier' : 'Créer' }}
-          </button>
-        </mat-dialog-actions>
-      </form>
-    </div>
-  `,
-  styles: [`
-    .dialog-container {
-      width: 100%;
-      max-width: 600px;
-    }
-
-    mat-dialog-content {
-      padding: 24px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .full-width {
-      width: 100%;
-    }
-
-    .zone-type-section,
-    .postal-codes-section,
-    .cities-section,
-    .radius-section,
-    .active-section {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-
-      label {
-        font-weight: 500;
-        color: var(--text-primary);
-      }
-
-      mat-radio-button {
-        margin-bottom: 8px;
-      }
-
-      textarea {
-        padding: 8px;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 14px;
-        background: var(--bg-primary);
-        color: var(--text-primary);
-
-        &:focus {
-          outline: none;
-          border-color: var(--primary);
-        }
-      }
-    }
-
-    mat-hint {
-      font-size: 0.75rem;
-      color: var(--text-secondary);
-    }
-
-    mat-dialog-actions {
-      gap: 8px;
-    }
-  `]
-})
+  templateUrl: './delivery-zone-dialog.component.html',
+  styleUrls: ['./delivery-zone-dialog.component.scss'],})
 export class DeliveryZoneDialogComponent {
   dialogRef = inject(MatDialogRef<DeliveryZoneDialogComponent>);
   data: DeliveryZone | null = inject(MAT_DIALOG_DATA);
@@ -314,3 +140,5 @@ export class DeliveryZoneDialogComponent {
     this.dialogRef.close();
   }
 }
+
+

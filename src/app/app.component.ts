@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
@@ -13,17 +13,8 @@ import { ChatWidgetComponent } from './shared/components/chat-widget/chat-widget
     RouterOutlet,
     ChatWidgetComponent
   ],
-  template: `
-    <router-outlet></router-outlet>
-    <app-chat-widget></app-chat-widget>
-  `,
-  styles: [`
-    :host {
-      display: block;
-      min-height: 100vh;
-    }
-  `]
-})
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],})
 export class AppComponent implements OnInit {
   constructor(
     private authService: AuthService,
@@ -38,3 +29,5 @@ export class AppComponent implements OnInit {
     this.themeService.initializeTheme();
   }
 }
+
+
