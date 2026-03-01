@@ -58,8 +58,9 @@
             </a>
           </nav>
 
-          <!-- Actions -->
-          <div class="actions">
+          <div class="right-controls">
+            <!-- Actions -->
+            <div class="actions">
             <!-- Theme Toggle -->
             <button class="action-btn theme-btn"
                     (click)="themeService.toggleTheme()"
@@ -161,12 +162,13 @@
                 <mat-icon>arrow_forward</mat-icon>
               </a>
             }
-          </div>
+            </div>
 
-          <!-- Mobile Menu Toggle -->
-          <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
-            <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
-          </button>
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+              <mat-icon>{{ mobileMenuOpen() ? 'close' : 'menu' }}</mat-icon>
+            </button>
+          </div>
         </div>
 
         <!-- Mobile Menu -->
