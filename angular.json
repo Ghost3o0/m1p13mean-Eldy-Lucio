@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "bazarbe": {
+    "m1p13mean-eldy-lucio": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,7 +18,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/bazarbe",
+            "outputPath": "dist/m1p13mean-eldy-lucio",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -71,10 +71,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "bazarbe:build:production"
+              "buildTarget": "m1p13mean-eldy-lucio:build:production"
             },
             "development": {
-              "buildTarget": "bazarbe:build:development"
+              "buildTarget": "m1p13mean-eldy-lucio:build:development"
             }
           },
           "defaultConfiguration": "development"
