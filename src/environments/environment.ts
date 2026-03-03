@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080/api',
-  socketUrl: 'http://localhost:8080',
-  appName: "Bazar'Be"
+  apiUrl: 'https://m1p13mean-eldy-lucio.onrender.com/api',
+  socketUrl: 'https://m1p13mean-eldy-lucio.onrender.com',
+  appName: "m1p13mean-eldy-lucio"
 };
