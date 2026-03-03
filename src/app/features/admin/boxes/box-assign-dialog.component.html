@@ -1,15 +1,25 @@
-<h2 mat-dialog-title>Assigner une boutique</h2>
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-icon">person_add</mat-icon>
+  Assigner une boutique
+</h2>
+
 <mat-dialog-content>
   <div class="assign-content">
-    <p class="box-info">
-      <mat-icon>business</mat-icon>
-      <strong>{{ data.box.name }}</strong>
-      @if (data.box.location?.floor || data.box.location?.zone) {
-        <span class="location">
-          (Étage {{ data.box.location?.floor }}, Zone {{ data.box.location?.zone }})
-        </span>
-      }
-    </p>
+    <!-- Box Info Card -->
+    <div class="box-info-card">
+      <div class="box-icon">
+        <mat-icon>inventory_2</mat-icon>
+      </div>
+      <div class="box-details">
+        <span class="box-name">{{ data.box.name }}</span>
+        @if (data.box.location?.floor || data.box.location?.zone) {
+          <span class="box-location">
+            <mat-icon>place</mat-icon>
+            Étage {{ data.box.location?.floor }}, Zone {{ data.box.location?.zone }}
+          </span>
+        }
+      </div>
+    </div>
 
     @if (isLoading()) {
       <div class="loading">
@@ -17,40 +27,53 @@
         <span>Chargement des boutiques...</span>
       </div>
     } @else {
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Sélectionner une boutique</mat-label>
-        <mat-select [(ngModel)]="selectedShopId">
-          @for (shop of shops(); track shop._id) {
-            <mat-option [value]="shop._id">
-              <div class="shop-option">
-                <span class="shop-name">{{ shop.name }}</span>
-                @if (shop.boxId) {
-                  <span class="has-box">(déjà un box)</span>
-                }
-              </div>
-            </mat-option>
-          }
-        </mat-select>
-        <mat-hint>Seules les boutiques approuvées sont affichées</mat-hint>
-      </mat-form-field>
+      <div class="shop-selection">
+        <h4><mat-icon>store</mat-icon> Sélectionner une boutique</h4>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Boutique</mat-label>
+          <mat-select [(ngModel)]="selectedShopId">
+            <mat-select-trigger>
+              @if (selectedShopId) {
+                <mat-icon>store</mat-icon>
+                {{ getSelectedShopName() }}
+              }
+            </mat-select-trigger>
+            @for (shop of shops(); track shop._id) {
+              <mat-option [value]="shop._id" [disabled]="shop.boxId">
+                <div class="shop-option">
+                  <mat-icon>store</mat-icon>
+                  <span class="shop-name">{{ shop.name }}</span>
+                  @if (shop.boxId) {
+                    <mat-chip class="has-box-chip">Déjà assigné</mat-chip>
+                  }
+                </div>
+              </mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>search</mat-icon>
+          <mat-hint>Seules les boutiques approuvées sont affichées</mat-hint>
+        </mat-form-field>
+      </div>
 
       @if (shops().length === 0) {
         <div class="no-shops">
-          <mat-icon>info</mat-icon>
-          <p>Aucune boutique disponible pour l'assignation.</p>
+          <mat-icon>warning</mat-icon>
+          <div class="no-shops-content">
+            <strong>Aucune boutique disponible</strong>
+            <p>Il n'y a pas de boutique approuvée pouvant être assignée à ce box.</p>
+          </div>
         </div>
       }
     }
   </div>
 </mat-dialog-content>
+
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Annuler</button>
   <button mat-raised-button color="primary" (click)="assign()"
           [disabled]="isSaving() || !selectedShopId">
-    @if (isSaving()) {
-      Assignation...
-    } @else {
-      Assigner
-    }
+    <mat-icon>{{ isSaving() ? 'sync' : 'link' }}</mat-icon>
+    {{ isSaving() ? 'Assignation...' : 'Assigner' }}
   </button>
 </mat-dialog-actions>

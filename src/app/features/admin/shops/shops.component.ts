@@ -19,6 +19,12 @@ import { environment } from '@env/environment';
 import { Shop } from '@shared/models/product.model';
 import { LoadingComponent } from '@shared/components/loading/loading.component';
 
+interface ShopStats {
+  attent:number;
+  approved:number;
+  suspended:number;
+}
+
 @Component({
   selector: 'app-admin-shops',
   standalone: true,
@@ -48,12 +54,13 @@ export class AdminShopsComponent implements OnInit {
   categories = signal<any[]>([]);
   pagination = signal<any>(null);
   isLoading = signal(true);
+  stats = signal<ShopStats | null>(null);
 
   totalShops = signal(0);
   pendingCount = signal(0);
   approvedCount = signal(0);
 
-  displayedColumns = ['logo', 'name', 'owner', 'category', 'products', 'status', 'date', 'actions'];
+  displayedColumns = ['logo', 'name', 'owner', 'status', 'date', 'actions'];
 
   searchQuery = '';
   selectedCategory: string | null = null;
@@ -64,32 +71,32 @@ export class AdminShopsComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadCategories();
-    this.loadStats();
+    // this.loadCategories();
+    // this.loadStats();
     this.loadShops();
   }
 
-  loadCategories(): void {
-    this.http.get<any>(`${environment.apiUrl}/products/categories`).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.categories.set(response.data.categories);
-        }
-      }
-    });
-  }
+  // loadCategories(): void {
+  //   this.http.get<any>(`${environment.apiUrl}/products/categories`).subscribe({
+  //     next: (response) => {
+  //       if (response.success) {
+  //         this.categories.set(response.data.categories);
+  //       }
+  //     }
+  //   });
+  // }
 
-  loadStats(): void {
-    this.http.get<any>(`${environment.apiUrl}/admin/shops/stats`).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.totalShops.set(response.data.total || 0);
-          this.pendingCount.set(response.data.pending || 0);
-          this.approvedCount.set(response.data.approved || 0);
-        }
-      }
-    });
-  }
+  // loadStats(): void {
+  //   this.http.get<any>(`${environment.apiUrl}/admin/shops/stats`).subscribe({
+  //     next: (response) => {
+  //       if (response.success) {
+  //         this.totalShops.set(response.data.total || 0);
+  //         this.pendingCount.set(response.data.pending || 0);
+  //         this.approvedCount.set(response.data.approved || 0);
+  //       }
+  //     }
+  //   });
+  // }
 
   loadShops(page = 1): void {
     this.isLoading.set(true);
@@ -103,6 +110,9 @@ export class AdminShopsComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/admin/shops`, { params }).subscribe({
       next: (response) => {
         if (response.success) {
+          console.log(response.data.shops);
+          
+          this.stats.set(response.stats);
           this.shops.set(response.data.shops);
           this.pagination.set(response.data.pagination);
         }
@@ -173,7 +183,7 @@ export class AdminShopsComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.loadShops();
-          this.loadStats();
+          // this.loadStats();
         }
       }
     });

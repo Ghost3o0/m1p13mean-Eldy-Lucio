@@ -1,26 +1,33 @@
-<h2 mat-dialog-title>{{ data.box ? 'Modifier le box' : 'Nouveau box' }}</h2>
+<h2 mat-dialog-title>
+  <mat-icon class="dialog-icon">{{ data.box ? 'edit' : 'add_box' }}</mat-icon>
+  {{ data.box ? 'Modifier le box' : 'Nouveau box' }}
+</h2>
+
 <mat-dialog-content>
   <form class="box-form">
     <!-- Basic Info -->
     <div class="form-section">
-      <h3>Informations générales</h3>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nom du box</mat-label>
-        <input matInput [(ngModel)]="formData.name" name="name" required placeholder="Ex: Box A-101">
-      </mat-form-field>
+      <h3><mat-icon>info</mat-icon> Informations générales</h3>
+      <div class="form-fields">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom du box</mat-label>
+          <input matInput [(ngModel)]="formData.name" name="name" required placeholder="Ex: Box A-101">
+          <mat-icon matPrefix>label</mat-icon>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
-        <textarea matInput [(ngModel)]="formData.description" name="description" rows="3"
-                  placeholder="Description du box..."></textarea>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput [(ngModel)]="formData.description" name="description" rows="3"
+                    placeholder="Description du box..."></textarea>
+        </mat-form-field>
+      </div>
     </div>
 
     <mat-divider></mat-divider>
 
     <!-- Location -->
     <div class="form-section">
-      <h3>Emplacement</h3>
+      <h3><mat-icon>place</mat-icon> Emplacement</h3>
       <div class="form-row">
         <mat-form-field appearance="outline">
           <mat-label>Étage</mat-label>
@@ -54,7 +61,7 @@
 
     <!-- Dimensions -->
     <div class="form-section">
-      <h3>Dimensions</h3>
+      <h3><mat-icon>straighten</mat-icon> Dimensions</h3>
       <div class="form-row">
         <mat-form-field appearance="outline">
           <mat-label>Surface (m²)</mat-label>
@@ -77,7 +84,7 @@
 
     <!-- Rent -->
     <div class="form-section">
-      <h3>Loyer</h3>
+      <h3><mat-icon>payments</mat-icon> Loyer</h3>
       <div class="form-row">
         <mat-form-field appearance="outline" class="rent-field">
           <mat-label>Montant mensuel</mat-label>
@@ -91,7 +98,7 @@
 
     <!-- Equipment -->
     <div class="form-section">
-      <h3>Équipements</h3>
+      <h3><mat-icon>inventory_2</mat-icon> Équipements</h3>
       <div class="equipment-grid">
         @for (eq of equipmentOptions; track eq.value) {
           <mat-checkbox
@@ -105,13 +112,11 @@
     </div>
   </form>
 </mat-dialog-content>
+
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Annuler</button>
   <button mat-raised-button color="primary" (click)="save()" [disabled]="isSaving() || !formData.name">
-    @if (isSaving()) {
-      Enregistrement...
-    } @else {
-      {{ data.box ? 'Modifier' : 'Créer' }}
-    }
+    <mat-icon>{{ isSaving() ? 'sync' : (data.box ? 'save' : 'add') }}</mat-icon>
+    <span [class.spin-icon]="isSaving()">{{ isSaving() ? 'Enregistrement...' : (data.box ? 'Modifier' : 'Créer') }}</span>
   </button>
 </mat-dialog-actions>

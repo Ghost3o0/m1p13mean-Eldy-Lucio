@@ -20,6 +20,14 @@ import { ShopRequestService } from '@shared/services/shop-request.service';
 import { LoadingComponent } from '@shared/components/loading/loading.component';
 import { RequestDetailDialogComponent } from './request-detail-dialog.component';
 
+interface ShopRequestStats {
+  pending : number;
+  in_review : number;
+  approved : number;
+  rejected : number;
+  completed : number;
+}
+
 @Component({
   selector: 'app-admin-shop-requests',
   standalone: true,
@@ -49,7 +57,7 @@ import { RequestDetailDialogComponent } from './request-detail-dialog.component'
 })
 export class AdminShopRequestsComponent implements OnInit {
   requests = signal([]);
-  stats = signal(null);
+  stats = signal<ShopRequestStats | null>(null);
   pagination = signal(null);
   isLoading = signal(true);
 
@@ -83,7 +91,7 @@ export class AdminShopRequestsComponent implements OnInit {
   loadRequests(page = 1) {
     this.isLoading.set(true);
 
-    const filters = { page, limit: 20 };
+    const filters = { page, limit: 10 };
     if (this.selectedType) filters['type'] = this.selectedType;
 
     const statusFilter = this.statusFilters[this.currentTab];
@@ -94,8 +102,10 @@ export class AdminShopRequestsComponent implements OnInit {
     }
 
     this.shopRequestService.getAllRequests(filters).subscribe({
-      next: (response: any) => {
+      next: (response: any) => {        
         if (response.success) {
+          console.log(response);
+          this.stats.set(response.stats);
           this.requests.set(response.data.requests);
           this.pagination.set(response.data.pagination);
         }

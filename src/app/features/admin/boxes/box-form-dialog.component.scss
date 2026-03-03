@@ -1,20 +1,50 @@
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+
+  .dialog-icon {
+    color: var(--primary);
+  }
+}
+
 mat-dialog-content {
   min-width: 500px;
+  max-height: 65vh;
+  padding: 0 24px;
 }
 
 .box-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .form-section {
   padding: 16px 0;
 
   h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin: 0 0 16px 0;
     font-size: 1rem;
-    color: var(--text-secondary);
+    font-weight: 500;
+    color: var(--primary);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 }
 
@@ -25,9 +55,11 @@ mat-dialog-content {
 .form-row {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 
   mat-form-field {
     flex: 1;
+    min-width: 140px;
   }
 }
 
@@ -38,30 +70,76 @@ mat-dialog-content {
 .equipment-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 12px;
 
   mat-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: var(--bg-hover);
+    }
+
     .eq-icon {
       font-size: 18px;
       width: 18px;
       height: 18px;
-      margin-right: 4px;
+      margin-right: 6px;
       vertical-align: middle;
+      color: var(--text-secondary);
     }
   }
 }
 
 mat-divider {
-  margin: 8px 0;
+  margin: 0;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+  gap: 12px;
+
+  button {
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+button:disabled mat-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 600px) {
   mat-dialog-content {
     min-width: auto;
+    width: 100%;
   }
 
   .form-row {
     flex-direction: column;
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+
+  .rent-field {
+    max-width: 100%;
   }
 
   .equipment-grid {

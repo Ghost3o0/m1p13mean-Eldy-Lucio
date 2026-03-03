@@ -1,0 +1,44 @@
+
+    mat-dialog-content { min-width: 400px; }
+    .assign-content { padding: 16px 0; }
+    .box-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      margin-bottom: 24px;
+      mat-icon { color: var(--primary); }
+      .location { color: var(--text-secondary); font-size: 0.9rem; }
+    }
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 32px;
+      color: var(--text-secondary);
+    }
+    .full-width { width: 100%; }
+    .shop-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      .shop-name { font-weight: 500; }
+      .has-box { font-size: 0.85rem; color: var(--warning); }
+    }
+    .no-shops {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px;
+      background: var(--warning-light);
+      border-radius: 8px;
+      color: var(--warning);
+      mat-icon { color: var(--warning); }
+    }
+    @media (max-width: 600px) {
+      mat-dialog-content { min-width: auto; }
+    }
+  

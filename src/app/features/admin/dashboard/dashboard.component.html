@@ -38,37 +38,13 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="stat-card">
-        <mat-card-content>
-          <div class="stat-icon products">
-            <mat-icon>inventory_2</mat-icon>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ stats()?.totalProducts }}</span>
-            <span class="stat-label">Produits</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="stat-card" routerLink="/admin/orders">
-        <mat-card-content>
-          <div class="stat-icon orders">
-            <mat-icon>receipt_long</mat-icon>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ stats()?.totalOrders }}</span>
-            <span class="stat-label">Commandes</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
       <mat-card class="stat-card revenue">
         <mat-card-content>
           <div class="stat-icon revenue-icon">
             <mat-icon>euro</mat-icon>
           </div>
           <div class="stat-info">
-            <span class="stat-value">{{ stats()?.totalRevenue | ariary:'symbol':'1.0-0' }}</span>
+            <span class="stat-value">{{ stats()?.totalRentMonth | ariary:'symbol':'1.0-0' }}</span>
             <span class="stat-label">Revenu total</span>
             <span class="stat-detail">{{ stats()?.todayRevenue | ariary }} aujourd'hui</span>
           </div>
@@ -89,7 +65,7 @@
     </div>
 
     <!-- Charts Row -->
-    <div class="charts-row">
+    <!-- <div class="charts-row">
       <mat-card class="chart-card">
         <mat-card-header>
           <mat-card-title>Revenus des 30 derniers jours</mat-card-title>
@@ -107,7 +83,7 @@
           <canvas baseChart [data]="categoryChartData" [options]="categoryChartOptions" type="doughnut"></canvas>
         </mat-card-content>
       </mat-card>
-    </div>
+    </div> -->
 
     <!-- Recent Activity -->
     <div class="activity-row">

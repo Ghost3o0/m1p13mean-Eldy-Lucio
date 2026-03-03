@@ -9,7 +9,7 @@
           <input matInput [(ngModel)]="searchQuery" (keyup.enter)="loadUsers()" placeholder="Nom, email...">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
-        <mat-form-field appearance="outline">
+        <!-- <mat-form-field appearance="outline">
           <mat-label>Rôle</mat-label>
           <mat-select [(ngModel)]="selectedRole" (selectionChange)="loadUsers()">
             <mat-option [value]="null">Tous</mat-option>
@@ -17,7 +17,7 @@
             <mat-option value="shop">Vendeurs</mat-option>
             <mat-option value="admin">Administrateurs</mat-option>
           </mat-select>
-        </mat-form-field>
+        </mat-form-field> -->
       </div>
     </mat-card-content>
   </mat-card>

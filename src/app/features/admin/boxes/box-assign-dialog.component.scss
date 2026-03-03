@@ -1,42 +1,216 @@
-mat-dialog-content { min-width: 400px; }
-.assign-content { padding: 16px 0; }
-.box-info {
+h2[mat-dialog-title] {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 16px;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  margin-bottom: 24px;
-  mat-icon { color: var(--primary); }
-  .location { color: var(--text-secondary); font-size: 0.9rem; }
+  gap: 12px;
+  margin: 0;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+
+  .dialog-icon {
+    color: var(--primary);
+  }
 }
+
+mat-dialog-content {
+  min-width: 450px;
+  padding: 24px;
+}
+
+.assign-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.box-info-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--primary-50), var(--bg-secondary));
+  border-radius: 12px;
+  border: 1px solid var(--primary-100);
+
+  .box-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: var(--primary);
+    border-radius: 12px;
+
+    mat-icon {
+      color: white;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .box-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .box-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .box-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+.shop-selection {
+  h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--primary);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
 .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 32px;
+  padding: 40px;
   color: var(--text-secondary);
 }
-.full-width { width: 100%; }
+
+.full-width {
+  width: 100%;
+}
+
 .shop-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  .shop-name { font-weight: 500; }
-  .has-box { font-size: 0.85rem; color: var(--warning); }
+  gap: 10px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+  }
+
+  .shop-name {
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .has-box-chip {
+    font-size: 0.75rem;
+    height: 22px;
+    line-height: 22px;
+    background-color: var(--warning-light);
+    color: var(--warning);
+  }
 }
-.no-shops {
+
+mat-select-trigger {
   display: flex;
   align-items: center;
   gap: 8px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--primary);
+  }
+}
+
+.no-shops {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   padding: 16px;
   background: var(--warning-light);
-  border-radius: 8px;
-  color: var(--warning);
-  mat-icon { color: var(--warning); }
+  border-radius: 12px;
+  border: 1px solid var(--warning);
+
+  > mat-icon {
+    color: var(--warning);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .no-shops-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    strong {
+      color: var(--warning);
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+  }
 }
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+  gap: 12px;
+
+  button {
+    mat-icon {
+      margin-right: 4px;
+    }
+  }
+}
+
+button:disabled mat-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 600px) {
-  mat-dialog-content { min-width: auto; }
+  mat-dialog-content {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .box-info-card {
+    flex-direction: column;
+    text-align: center;
+  }
 }

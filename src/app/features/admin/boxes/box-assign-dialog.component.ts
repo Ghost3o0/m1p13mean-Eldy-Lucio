@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@env/environment';
 import { BoxService } from '@shared/services/box.service';
@@ -22,7 +23,8 @@ import { BoxService } from '@shared/services/box.service';
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatChipsModule
   ],
   templateUrl: './box-assign-dialog.component.html',
   styleUrls: ['./box-assign-dialog.component.scss']
@@ -58,6 +60,11 @@ export class BoxAssignDialogComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  getSelectedShopName(): string {
+    const shop = this.shops().find(s => s._id === this.selectedShopId);
+    return shop?.name || '';
   }
 
   assign() {

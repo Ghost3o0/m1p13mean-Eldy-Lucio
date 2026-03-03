@@ -52,21 +52,18 @@ export class AdminLayoutComponent {
   managementItems: NavItem[] = [
     { label: 'Utilisateurs', icon: 'people', route: '/admin/users' },
     { label: 'Boutiques', icon: 'store', route: '/admin/shops' },
-    { label: 'Commandes', icon: 'shopping_cart', route: '/admin/orders' },
     { label: 'Catégories', icon: 'category', route: '/admin/categories' }
   ];
 
   mallItems: NavItem[] = [
     { label: 'Boxes', icon: 'grid_view', route: '/admin/boxes' },
-    { label: 'Loyers', icon: 'payments', route: '/admin/rent-payments' },
-    { label: 'Demandes boutique', icon: 'description', route: '/admin/shop-requests', badge: 2 },
-    { label: 'Demandes vendeur', icon: 'person_add', route: '/admin/vendor-requests', badge: 4 },
-    { label: 'Tickets support', icon: 'support_agent', route: '/admin/tickets', badge: 5 }
+    { label: 'Demandes boutique', icon: 'description', route: '/admin/shop-requests' },
+    { label: 'Tickets support', icon: 'support_agent', route: '/admin/tickets' }
   ];
 
   configItems: NavItem[] = [
     { label: 'Page d\'accueil', icon: 'web', route: '/admin/landing' },
-    { label: 'Paramètres', icon: 'settings', route: '/admin/settings' }
+    // { label: 'Paramètres', icon: 'settings', route: '/admin/settings' }
   ];
 
   constructor(
@@ -100,6 +97,8 @@ export class AdminLayoutComponent {
 
   logout(): void {
     this.authService.logout();
+    console.log("Don't let me down");
+    
     this.router.navigate(['/']);
   }
 }

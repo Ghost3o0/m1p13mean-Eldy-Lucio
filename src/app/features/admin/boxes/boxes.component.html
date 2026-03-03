@@ -1,64 +1,187 @@
 <div class="boxes-container">
-  <!-- Filters -->
-  <mat-card class="filters-card">
-    <div class="filters-row">
-      <mat-form-field appearance="outline">
-        <mat-label>Statut</mat-label>
-        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterBoxes()">
-          <mat-option value="">Tous</mat-option>
-          <mat-option value="available">Disponible</mat-option>
-          <mat-option value="occupied">Occupé</mat-option>
-          <mat-option value="unavailable">Indisponible</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Étage</mat-label>
-        <mat-select [(ngModel)]="selectedFloor" (selectionChange)="filterBoxes()">
-          <mat-option value="">Tous</mat-option>
-          @for (floor of floors; track floor) {
-            <mat-option [value]="floor">{{ floor }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Zone</mat-label>
-        <mat-select [(ngModel)]="selectedZone" (selectionChange)="filterBoxes()">
-          <mat-option value="">Toutes</mat-option>
-          @for (zone of zones; track zone) {
-            <mat-option [value]="zone">{{ zone }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <button mat-raised-button color="accent" (click)="openAddBoxDialog()">
-        <mat-icon>add</mat-icon>
-        Ajouter une box
-      </button>
-    </div>
-  </mat-card>
-
-  <!-- Boxes Grid -->
-  <div class="loading-container">
-    @if (isLoading()) {
-      <app-loading></app-loading>
-    }
+  <!-- Header -->
+  <div class="boxes-header">
+    <h1>Gestion des boxes</h1>
+    <button mat-raised-button color="primary" (click)="openForm()">
+      <mat-icon>add</mat-icon>
+      Ajouter un box
+    </button>
   </div>
 
+  @if (isLoading()) {
+    <app-loading message="Chargement des boxes..."></app-loading>
+  }
+
   @if (!isLoading()) {
-    @if (filteredBoxes().length > 0) {
+    <!-- Box Form -->
+    @if (showForm()) {
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>{{ editingBox() ? 'edit' : 'add_box' }}</mat-icon>
+            {{ editingBox() ? 'Modifier le box' : 'Nouveau box' }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="boxForm" (ngSubmit)="saveBox()">
+            <!-- Basic Info -->
+            <div class="form-section">
+              <h3><mat-icon>info</mat-icon> Informations générales</h3>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Nom du box</mat-label>
+                <input matInput formControlName="name" placeholder="Ex: Box A-101">
+                @if (boxForm.get('name')?.hasError('required') && boxForm.get('name')?.touched) {
+                  <mat-error>Le nom est requis</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="2" placeholder="Description du box..."></textarea>
+              </mat-form-field>
+            </div>
+
+            <!-- Location -->
+            <div class="form-section">
+              <h3><mat-icon>place</mat-icon> Emplacement</h3>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Étage</mat-label>
+                  <mat-select formControlName="floor">
+                    <mat-option value="RDC">RDC</mat-option>
+                    <mat-option value="1">1er étage</mat-option>
+                    <mat-option value="2">2ème étage</mat-option>
+                    <mat-option value="3">3ème étage</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Zone</mat-label>
+                  <mat-select formControlName="zone">
+                    <mat-option value="A">Zone A</mat-option>
+                    <mat-option value="B">Zone B</mat-option>
+                    <mat-option value="C">Zone C</mat-option>
+                    <mat-option value="D">Zone D</mat-option>
+                    <mat-option value="E">Zone E</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Position</mat-label>
+                  <input matInput formControlName="position" placeholder="Ex: 101">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Dimensions -->
+            <div class="form-section">
+              <h3><mat-icon>straighten</mat-icon> Dimensions</h3>
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Surface (m²)</mat-label>
+                  <input matInput type="number" formControlName="area" min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Longueur (m)</mat-label>
+                  <input matInput type="number" formControlName="length" min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Largeur (m)</mat-label>
+                  <input matInput type="number" formControlName="width" min="0">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Rent -->
+            <div class="form-section">
+              <h3><mat-icon>payments</mat-icon> Loyer</h3>
+              <mat-form-field appearance="outline" class="rent-field">
+                <mat-label>Montant mensuel</mat-label>
+                <input matInput type="number" formControlName="rentAmount" min="0">
+                <span matTextSuffix>Ar</span>
+              </mat-form-field>
+            </div>
+
+            <!-- Equipment -->
+            <div class="form-section">
+              <h3><mat-icon>inventory_2</mat-icon> Équipements</h3>
+              <div class="equipment-grid">
+                @for (eq of equipmentOptions; track eq.value) {
+                  <mat-checkbox
+                    [checked]="isEquipmentSelected(eq.value)"
+                    (change)="toggleEquipment(eq.value, $event.checked)">
+                    <mat-icon class="eq-icon">{{ eq.icon }}</mat-icon>
+                    {{ eq.label }}
+                  </mat-checkbox>
+                }
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button mat-button type="button" (click)="closeForm()">Annuler</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="boxForm.invalid || isSaving()">
+                <mat-icon>{{ isSaving() ? 'sync' : (editingBox() ? 'save' : 'add') }}</mat-icon>
+                {{ isSaving() ? 'Enregistrement...' : (editingBox() ? 'Enregistrer' : 'Créer') }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Filters -->
+    <mat-card class="filters-card">
+      <div class="filters-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Statut</mat-label>
+          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="filterBoxes()">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="available">Disponible</mat-option>
+            <mat-option value="occupied">Occupé</mat-option>
+            <mat-option value="unavailable">Indisponible</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Étage</mat-label>
+          <mat-select [(ngModel)]="selectedFloor" (selectionChange)="filterBoxes()">
+            <mat-option [value]="null">Tous</mat-option>
+            @for (floor of floors; track floor) {
+              <mat-option [value]="floor">{{ floor }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Zone</mat-label>
+          <mat-select [(ngModel)]="selectedZone" (selectionChange)="filterBoxes()">
+            <mat-option [value]="null">Toutes</mat-option>
+            @for (zone of zones; track zone) {
+              <mat-option [value]="zone">{{ zone }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    <!-- Boxes Grid -->
+    @if (boxes().length > 0) {
       <div class="boxes-grid">
-        @for (box of filteredBoxes(); track box._id) {
-          <mat-card class="box-card" [class.occupied]="box.status === 'occupied'" [class.unavailable]="box.status === 'unavailable'">
+        @for (box of boxes(); track box._id) {
+          <mat-card class="box-card" [class.occupied]="box.currentShopId" [class.unavailable]="box.availability?.status === 'not_usable'">
             <div class="box-header">
               <div class="box-info">
-                <h3>{{ box.code }}</h3>
-                <span class="box-location">{{ box.floor }} - {{ box.zone }}</span>
+                <h3>{{ box.name }}</h3>
+                <span class="box-location">
+                  <mat-icon>place</mat-icon>
+                  {{ box.location?.floor || 'RDC' }} - Zone {{ box.location?.zone || 'A' }}
+                </span>
               </div>
               <mat-chip-set>
-                <mat-chip [class]="'status-' + box.status">
-                  {{ getStatusLabel(box.status) }}
+                <mat-chip [class]="getStatusClass(box)">
+                  {{ getBoxStatusLabel(box) }}
                 </mat-chip>
               </mat-chip-set>
             </div>
@@ -68,32 +191,32 @@
             <div class="box-details">
               <div class="detail-row">
                 <span class="label">Dimensions</span>
-                <span>{{ box.dimensions.width }}m × {{ box.dimensions.depth }}m × {{ box.dimensions.height }}m</span>
+                <span>{{ box.dimensions?.length || 0 }}m × {{ box.dimensions?.width || 0 }}m</span>
               </div>
               <div class="detail-row">
                 <span class="label">Surface</span>
-                <span>{{ (box.dimensions.width * box.dimensions.depth).toFixed(2) }}m²</span>
+                <span>{{ box.dimensions?.area || 0 }} m²</span>
               </div>
               <div class="detail-row">
                 <span class="label">Loyer mensuel</span>
-                <span>{{ box.monthlyRent | ariary }}</span>
+                <span class="rent-amount">{{ box.currentRent?.amount || 0 }} Ar</span>
               </div>
 
-              @if (box.status === 'occupied') {
+              @if (box.currentShopId) {
                 <div class="occupant-info">
                   <span class="label">Occupant</span>
-                  <span>{{ box.assignedShop?.name }}</span>
+                  <span>{{ getShopName(box.currentShopId) }}</span>
                 </div>
               }
 
-              @if (box.equipment?.length > 0) {
+              @if (box.equipment && box.equipment.length > 0) {
                 <div class="equipment-list">
                   <span class="label">Équipements</span>
                   <div class="equipment-tags">
                     @for (item of box.equipment; track item) {
-                      <mat-chip size="small">
+                      <mat-chip class="equipment-chip">
                         <mat-icon>{{ getEquipmentIcon(item) }}</mat-icon>
-                        {{ item }}
+                        {{ getEquipmentLabel(item) }}
                       </mat-chip>
                     }
                   </div>
@@ -102,13 +225,14 @@
             </div>
 
             <div class="box-actions">
-              @if (box.status === 'available') {
-                <button mat-stroked-button size="small" (click)="assignShop(box)">
+              @if (!box.currentShopId && box.availability?.status !== 'not_usable') {
+                <button mat-stroked-button class="btn-small" (click)="assignShop(box)">
                   <mat-icon>person_add</mat-icon>
                   Assigner
                 </button>
-              } @else if (box.status === 'occupied') {
-                <button mat-stroked-button size="small" (click)="unassignShop(box)">
+              }
+              @if (box.currentShopId) {
+                <button mat-stroked-button class="btn-small" (click)="unassignShop(box)">
                   <mat-icon>person_remove</mat-icon>
                   Libérer
                 </button>
@@ -126,7 +250,12 @@
     } @else {
       <mat-card class="empty-state">
         <mat-icon>inventory_2</mat-icon>
-        <p>Aucune box trouvée</p>
+        <h3>Aucun box trouvé</h3>
+        <p>Créez des boxes pour gérer vos espaces de location.</p>
+        <button mat-raised-button color="primary" (click)="openForm()">
+          <mat-icon>add</mat-icon>
+          Ajouter un box
+        </button>
       </mat-card>
     }
   }

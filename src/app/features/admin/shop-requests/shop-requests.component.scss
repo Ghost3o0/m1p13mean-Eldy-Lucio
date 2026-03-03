@@ -38,6 +38,24 @@
         color: var(--error);
       }
 
+          &.approved {
+      .stat-value {
+        color: var(--success);
+      }
+    }
+
+    &.rejected {
+      .stat-value {
+        color: var(--error);
+      }
+    }
+
+    &.completed {
+      .stat-value {
+        color: var(--gray-500);
+      }
+    }
+
       .stat-label {
         font-size: 0.85rem;
         color: var(--text-secondary);

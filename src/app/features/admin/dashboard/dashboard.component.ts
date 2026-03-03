@@ -16,10 +16,9 @@ import { AriaryPipe } from '@shared/pipes/ariary.pipe';
 interface DashboardStats {
   totalUsers: number;
   totalShops: number;
-  totalProducts: number;
-  totalOrders: number;
   totalRevenue: number;
-  todayRevenue: number;
+  totalRent: number;
+  totalRentMonth: number;
   pendingShops: number;
   openTickets: number;
 }
@@ -96,10 +95,12 @@ export class AdminDashboardComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/admin/dashboard`).subscribe({
       next: (response) => {
         if (response.success) {
-          this.stats.set(response.data.stats);
+          console.log(response);
+          
+          this.stats.set(response.data.overview);
           this.pendingShops.set(response.data.pendingShops || []);
-          this.recentTickets.set(response.data.recentTickets || []);
-
+          this.recentTickets.set(response.data.recentTickets || []);          
+          
           if (response.data.revenueByDay) {
             this.revenueChartData.labels = response.data.revenueByDay.map((d: any) => d.date);
             this.revenueChartData.datasets[0].data = response.data.revenueByDay.map((d: any) => d.total);

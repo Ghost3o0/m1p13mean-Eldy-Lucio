@@ -2,7 +2,7 @@
   <div class="requests-header">
     <h1>Demandes des boutiques</h1>
     <div class="header-stats">
-      <div class="stat pending">
+      <!-- <div class="stat pending">
         <span class="stat-value">{{ stats()?.pending || 0 }}</span>
         <span class="stat-label">En attente</span>
       </div>
@@ -13,7 +13,33 @@
       <div class="stat">
         <span class="stat-value">{{ stats()?.inReview || 0 }}</span>
         <span class="stat-label">En cours</span>
+      </div> -->
+
+      <div class="stat pending">
+        <span class="stat-value">{{ stats()?.pending || 0 }}</span>
+        <span class="stat-label">En attente</span>
       </div>
+
+      <div class="stat in-review">
+        <span class="stat-value">{{ stats()?.in_review || 0 }}</span>
+        <span class="stat-label">En cours de révision</span>
+      </div>
+
+      <div class="stat approved">
+        <span class="stat-value">{{ stats()?.approved || 0 }}</span>
+        <span class="stat-label">Approuvé</span>
+      </div>
+
+      <div class="stat rejected">
+        <span class="stat-value">{{ stats()?.rejected || 0 }}</span>
+        <span class="stat-label">Rejeté</span>
+      </div>
+
+      <div class="stat completed">
+        <span class="stat-value">{{ stats()?.completed || 0 }}</span>
+        <span class="stat-label">Terminé</span>
+      </div>
+
     </div>
   </div>
 
@@ -27,8 +53,14 @@
         }
       </ng-template>
     </mat-tab>
-    <mat-tab label="En cours"></mat-tab>
-    <mat-tab label="Traitées"></mat-tab>
+    <mat-tab>
+      <ng-template mat-tab-label>
+        En cours
+        @if (stats()?.pending) {
+          <span class="badge">{{ stats()?.in_review }}</span>
+        }
+      </ng-template>
+    </mat-tab>
   </mat-tab-group>
 
   <!-- Filters -->
@@ -184,7 +216,6 @@
         [length]="pagination()?.total || 0"
         [pageSize]="pagination()?.limit || 20"
         [pageIndex]="(pagination()?.page || 1) - 1"
-        [pageSizeOptions]="[10, 20, 50]"
         (page)="onPageChange($event)"
         showFirstLastButtons>
       </mat-paginator>

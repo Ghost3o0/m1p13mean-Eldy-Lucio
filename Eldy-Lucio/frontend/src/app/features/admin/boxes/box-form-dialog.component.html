@@ -1,0 +1,117 @@
+<h2 mat-dialog-title>{{ data.box ? 'Modifier le box' : 'Nouveau box' }}</h2>
+    <mat-dialog-content>
+      <form class="box-form">
+        <!-- Basic Info -->
+        <div class="form-section">
+          <h3>Informations générales</h3>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom du box</mat-label>
+            <input matInput [(ngModel)]="formData.name" name="name" required placeholder="Ex: Box A-101">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput [(ngModel)]="formData.description" name="description" rows="3"
+                      placeholder="Description du box..."></textarea>
+          </mat-form-field>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Location -->
+        <div class="form-section">
+          <h3>Emplacement</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Étage</mat-label>
+              <mat-select [(ngModel)]="formData.location.floor" name="floor">
+                <mat-option value="RDC">RDC</mat-option>
+                <mat-option value="1">1er étage</mat-option>
+                <mat-option value="2">2ème étage</mat-option>
+                <mat-option value="3">3ème étage</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Zone</mat-label>
+              <mat-select [(ngModel)]="formData.location.zone" name="zone">
+                <mat-option value="A">Zone A</mat-option>
+                <mat-option value="B">Zone B</mat-option>
+                <mat-option value="C">Zone C</mat-option>
+                <mat-option value="D">Zone D</mat-option>
+                <mat-option value="E">Zone E</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Position</mat-label>
+              <input matInput [(ngModel)]="formData.location.position" name="position" placeholder="Ex: 101">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Dimensions -->
+        <div class="form-section">
+          <h3>Dimensions</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Surface (m²)</mat-label>
+              <input matInput type="number" [(ngModel)]="formData.dimensions.area" name="area" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Longueur (m)</mat-label>
+              <input matInput type="number" [(ngModel)]="formData.dimensions.length" name="length" min="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Largeur (m)</mat-label>
+              <input matInput type="number" [(ngModel)]="formData.dimensions.width" name="width" min="0">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Rent -->
+        <div class="form-section">
+          <h3>Loyer</h3>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="rent-field">
+              <mat-label>Montant mensuel</mat-label>
+              <input matInput type="number" [(ngModel)]="formData.currentRent.amount" name="rentAmount" min="0" required>
+              <span matTextSuffix>Ar</span>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Equipment -->
+        <div class="form-section">
+          <h3>Équipements</h3>
+          <div class="equipment-grid">
+            @for (eq of equipmentOptions; track eq.value) {
+              <mat-checkbox
+                [checked]="formData.equipment.includes(eq.value)"
+                (change)="toggleEquipment(eq.value, $event.checked)">
+                <mat-icon class="eq-icon">{{ eq.icon }}</mat-icon>
+                {{ eq.label }}
+              </mat-checkbox>
+            }
+          </div>
+        </div>
+      </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Annuler</button>
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="isSaving() || !formData.name">
+        @if (isSaving()) {
+          Enregistrement...
+        } @else {
+          {{ data.box ? 'Modifier' : 'Créer' }}
+        }
+      </button>
+    </mat-dialog-actions>
