@@ -8,7 +8,7 @@
           <a routerLink="/shop-manager/dashboard" class="logo">
             <span class="logo-icon">ðŸª</span>
             <span class="logo-text">Bazar'Be</span>
-            <span class="logo-badge">Vendeur</span>
+            <span class="logo-badge">Boutique</span>
           </a>
         </div>
 
@@ -48,7 +48,7 @@
             </a>
           </mat-menu>
 
-          <app-notifications></app-notifications>
+          <!-- <app-notifications></app-notifications> -->
 
           <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn">
             <div class="user-avatar">{{ getUserInitials() }}</div>
@@ -61,10 +61,6 @@
               </div>
             </div>
             <mat-divider></mat-divider>
-            <a mat-menu-item routerLink="/shop-manager/settings">
-              <mat-icon>settings</mat-icon>
-              <span>Paramètres boutique</span>
-            </a>
             <a mat-menu-item (click)="viewMyShop()">
               <mat-icon>storefront</mat-icon>
               <span>Voir ma boutique</span>
@@ -108,6 +104,13 @@
         <!-- Main Content -->
         <main class="shop-content" [class.sidebar-open]="sidebarOpen()">
           <router-outlet></router-outlet>
+          <br><br><br>
+          <footer class="app-footer">
+            <mat-toolbar color="primary">
+              <p>RABEMIAFARA Lucio Ben Ismael&nbsp;&nbsp;|&nbsp;&nbsp;VELONJARA Eldy Haryo</p>
+
+            </mat-toolbar>
+          </footer>
         </main>
       </div>
 

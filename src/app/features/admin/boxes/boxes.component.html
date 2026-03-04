@@ -191,7 +191,7 @@
             <div class="box-details">
               <div class="detail-row">
                 <span class="label">Dimensions</span>
-                <span>{{ box.dimensions?.length || 0 }}m × {{ box.dimensions?.width || 0 }}m</span>
+                <span>{{ (box.dimensions?.length || 0) | number:'1.0-2' }}m × {{ (box.dimensions?.width || 0) | number:'1.0-2' }}m</span>
               </div>
               <div class="detail-row">
                 <span class="label">Surface</span>

@@ -9,7 +9,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '@core/services/auth.service';
-import { NotificationsComponent } from '@shared/components/notifications/notifications.component';
+// import { NotificationsComponent } from '@shared/components/notifications/notifications.component';
 
 interface NavItem {
   label: string;
@@ -33,7 +33,7 @@ interface NavItem {
     MatBadgeModule,
     MatDividerModule,
     MatTooltipModule,
-    NotificationsComponent
+    // NotificationsComponent
   ],
   templateUrl: './shop-layout.component.html',
   styleUrls: ['./shop-layout.component.scss'],})
@@ -42,7 +42,7 @@ export class ShopLayoutComponent {
 
   navItems: NavItem[] = [
     { label: 'Tableau de bord', icon: 'dashboard', route: '/shop-manager/dashboard' },
-    { label: 'Commandes', icon: 'shopping_bag', route: '/shop-manager/orders', badge: 3 },
+    { label: 'Commandes', icon: 'shopping_bag', route: '/shop-manager/orders' },
     { label: 'Produits', icon: 'inventory_2', route: '/shop-manager/products' },
     { label: 'Stock', icon: 'warehouse', route: '/shop-manager/stock' },
     { label: 'Caisse (POS)', icon: 'point_of_sale', route: '/shop-manager/pos' },
@@ -51,9 +51,7 @@ export class ShopLayoutComponent {
     { label: 'Vendeurs', icon: 'people', route: '/shop-manager/sellers' },
     { label: 'Loyer', icon: 'payments', route: '/shop-manager/rent-payments' },
     { label: 'Demandes', icon: 'description', route: '/shop-manager/requests' },
-    { label: 'Page boutique', icon: 'web', route: '/shop-manager/landing' },
-    { label: 'Mon box', icon: 'store', route: '/shop-manager/box-info' },
-    { label: 'Paramètres', icon: 'settings', route: '/shop-manager/settings' }
+    { label: 'Mon box', icon: 'store', route: '/shop-manager/box-info' }
   ];
 
   constructor(

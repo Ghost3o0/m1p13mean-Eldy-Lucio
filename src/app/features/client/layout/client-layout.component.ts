@@ -13,7 +13,7 @@ import { AuthService } from '@core/services/auth.service';
 import { CartService } from '@shared/services/cart.service';
 import { ThemeService } from '@shared/services/theme.service';
 import { ProductService } from '@shared/services/product.service';
-import { NotificationsComponent } from '@shared/components/notifications/notifications.component';
+// import { NotificationsComponent } from '@shared/components/notifications/notifications.component';
 
 interface NavCategory {
   _id: string;
@@ -38,7 +38,7 @@ interface NavCategory {
     MatBadgeModule,
     MatDividerModule,
     MatTooltipModule,
-    NotificationsComponent
+    // NotificationsComponent
   ],
   templateUrl: './client-layout.component.html',
   styleUrls: ['./client-layout.component.scss'],})

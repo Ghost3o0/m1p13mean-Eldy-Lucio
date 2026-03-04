@@ -45,7 +45,7 @@ export class AdminCategoriesComponent implements OnInit {
   editingCategory = signal<Category | null>(null);
   imagePreview = signal<string | null>(null);
 
-  displayedColumns = ['image', 'name', 'parent', 'products', 'status', 'featured', 'actions'];
+  displayedColumns = ['image', 'name', 'actions'];
 
   categoryForm: FormGroup;
 
@@ -109,22 +109,6 @@ export class AdminCategoriesComponent implements OnInit {
     });
     this.imagePreview.set(category.image || null);
     this.showForm.set(true);
-  }
-
-  onImageSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.[0]) {
-      const formData = new FormData();
-      formData.append('image', input.files[0]);
-
-      this.http.post<any>(`${environment.apiUrl}/admin/upload-image`, formData).subscribe({
-        next: (response) => {
-          if (response.success) {
-            this.imagePreview.set(response.data.url);
-          }
-        }
-      });
-    }
   }
 
   saveCategory(): void {

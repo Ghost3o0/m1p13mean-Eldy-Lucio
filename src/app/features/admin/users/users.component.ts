@@ -117,7 +117,7 @@ export class AdminUsersComponent implements OnInit {
   isLoading = signal(true);
   searchQuery = '';
   selectedRole: string | null = null;
-  displayedColumns = ['name', 'email', 'role', 'status', 'date', 'actions'];
+  displayedColumns = ['name', 'email', 'date', 'actions'];
 
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);

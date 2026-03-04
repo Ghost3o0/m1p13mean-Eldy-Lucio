@@ -144,6 +144,8 @@ export class ShopDashboardComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/shop/dashboard`, { params }).subscribe({
       next: (response) => {
         if (response.success) {
+          console.log(response);
+          
           this.stats.set(response.data.stats);
           this.recentOrders.set(response.data.recentOrders || []);
 

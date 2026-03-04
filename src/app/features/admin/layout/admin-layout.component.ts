@@ -10,7 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { AuthService } from '@core/services/auth.service';
-import { NotificationsComponent } from '@shared/components/notifications/notifications.component';
+// import { NotificationsComponent } from '@shared/components/notifications/notifications.component';
 
 interface NavGroup {
   label: string;
@@ -41,7 +41,7 @@ interface NavItem {
     MatDividerModule,
     MatTooltipModule,
     MatExpansionModule,
-    NotificationsComponent
+    // NotificationsComponent
   ],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.scss']
@@ -62,7 +62,7 @@ export class AdminLayoutComponent {
   ];
 
   configItems: NavItem[] = [
-    { label: 'Page d\'accueil', icon: 'web', route: '/admin/landing' },
+    // { label: 'Page d\'accueil', icon: 'web', route: '/admin/landing' },
     // { label: 'Paramètres', icon: 'settings', route: '/admin/settings' }
   ];
 

@@ -12,15 +12,15 @@
       </a>
     </div>
 
-    <div class="header-center">
+    <!-- <div class="header-center"> -->
       <!-- System Status -->
-      <div class="system-status">
+      <!-- <div class="system-status">
         <div class="status-item">
           <mat-icon>check_circle</mat-icon>
           <span>Système OK</span>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="header-right">
       <!-- <button mat-icon-button matTooltip="Tickets support" routerLink="/admin/tickets">
@@ -68,7 +68,7 @@
           <span class="nav-label">Tableau de bord</span>
         </a>
 
-        <div class="nav-section-title">Gestion</div>
+        <!-- <div class="nav-section-title">Gestion</div> -->
 
         @for (item of managementItems; track item.route) {
           <a [routerLink]="item.route"
@@ -83,7 +83,7 @@
           </a>
         }
 
-        <div class="nav-section-title">Centre Commercial</div>
+        <!-- <div class="nav-section-title">Centre Commercial</div> -->
 
         @for (item of mallItems; track item.route) {
           <a [routerLink]="item.route"
@@ -98,7 +98,7 @@
           </a>
         }
 
-        <div class="nav-section-title">Configuration</div>
+        <!-- <div class="nav-section-title">Configuration</div> -->
 
         @for (item of configItems; track item.route) {
           <a [routerLink]="item.route"
@@ -122,7 +122,15 @@
     <!-- Main Content -->
     <main class="admin-content" [class.sidebar-open]="sidebarOpen()">
       <router-outlet></router-outlet>
+      <br><br><br>
+      <footer class="app-footer">
+        <mat-toolbar color="primary">
+          <p>RABEMIAFARA Lucio Ben Ismael&nbsp;&nbsp;|&nbsp;&nbsp;VELONJARA Eldy Haryo</p>
+
+        </mat-toolbar>
+      </footer>
     </main>
+
   </div>
 
   <!-- Mobile Overlay -->

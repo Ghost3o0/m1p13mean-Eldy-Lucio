@@ -316,3 +316,13 @@
     display: none;
   }
 }
+
+.app-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
